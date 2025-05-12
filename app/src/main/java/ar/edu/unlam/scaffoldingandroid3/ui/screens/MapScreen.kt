@@ -34,14 +34,18 @@ fun MapScreen(controller: NavHostController, modifier: Modifier = Modifier){
 
     Column (modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally){
 
+        var state: Boolean by remember { mutableStateOf(false) }
 
         //Mapa
+        if (state){
+            NavMenu(controller)
+        } else {
+            MonumentMap()
+        }
 
 
         //Boton Menu
         //su simbolo es un "+", al presionarlo se abre el menu y cambia a un "x"
-
-        var state: Boolean by remember { mutableStateOf(false) }
 
         Button(onClick = {state = !state},
             shape = CircleShape,
@@ -54,9 +58,17 @@ fun MapScreen(controller: NavHostController, modifier: Modifier = Modifier){
 
         }
 
-
-
-
         }
+}
+
+@Composable
+fun MonumentMap(){
 
 }
+
+@Composable
+fun NavMenu(navController : NavHostController){
+
+}
+
+

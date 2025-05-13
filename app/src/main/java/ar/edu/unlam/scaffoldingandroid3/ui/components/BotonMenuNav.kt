@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -18,7 +20,13 @@ fun BotonMenuNav(controller: NavController, ruta: NavigationRoutes, icon: ImageV
     Button(onClick = {controller.navigate(ruta.route)},
         shape = CircleShape,
         modifier = Modifier.size(64.dp),
-        contentPadding = PaddingValues(0.dp)) {
+        contentPadding = PaddingValues(0.dp),
+        colors = ButtonColors(
+            containerColor = Color.White,
+            contentColor = Color.Black,
+            disabledContainerColor = Color.Gray,
+            disabledContentColor = Color.Gray
+        )) {
 
         Icon(imageVector = icon, contentDescription = "NavButton")
 

@@ -11,8 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.MapScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.ProfileScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -32,6 +37,22 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
+                    NavHost(navController = controller, startDestination = NavigationRoutes.MapScreen.route) {
+
+                     composable (NavigationRoutes.MapScreen.route){
+
+                         MapScreen(controller)
+
+                     }
+
+                        composable (NavigationRoutes.ProfileScreen.route) {
+
+                            ProfileScreen()
+
+
+                        }
+
+                    }
                 }
             }
         }

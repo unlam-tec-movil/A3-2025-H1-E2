@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeFloatingActionButton
@@ -66,7 +67,13 @@ fun MapScreen(controller: NavHostController, modifier: Modifier = Modifier){
         Button(onClick = {state = !state},
             shape = CircleShape,
             modifier = Modifier.size(64.dp),
-            contentPadding = PaddingValues(0.dp)) {
+            contentPadding = PaddingValues(0.dp),
+            colors = ButtonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black,
+                disabledContainerColor = Color.Gray,
+                disabledContentColor = Color.Gray
+            )) {
 
             Icon(imageVector = if (state) Icons.Default.Close else Icons.Default.Add,
                 contentDescription = if (state) "Cerrar menu" else "Abrir menu",
@@ -89,7 +96,7 @@ fun MonumentMap(modifier: Modifier){
         ){
 
         //Es un ejemplo
-        @androidx.compose.runtime.Composable {
+        @Composable {
             Marker(
                 state = MarkerState(position = LatLng(-34.0, 151.0)),
                 title = "Sídney",

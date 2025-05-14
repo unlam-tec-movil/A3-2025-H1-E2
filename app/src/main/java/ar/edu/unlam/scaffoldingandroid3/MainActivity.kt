@@ -16,7 +16,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.AjustesScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.ComunidadScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.CreateMonumentScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.MapScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.MonumentosScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.NotificacionesScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.ProfileScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,6 +56,39 @@ class MainActivity : ComponentActivity() {
 
 
                         }
+
+                        composable (NavigationRoutes.CreateMonument.route) {
+
+                            CreateMonumentScreen()
+
+                        }
+
+                        composable (NavigationRoutes.AjustesScreen.route) {
+
+                            AjustesScreen()
+
+                        }
+
+                        composable (NavigationRoutes.NotificacionesScreen.route) {
+
+                            NotificacionesScreen()
+
+                        }
+
+                        composable (NavigationRoutes.ComunidadScreen.route) {
+
+                            ComunidadScreen()
+
+                        }
+
+                        composable (NavigationRoutes.MonumentosScreen.route) {
+
+                            MonumentosScreen()
+
+                        }
+
+                        composable (NavigationRoutes.AlbumScreen.route) {  }
+
 
                     }
                 }

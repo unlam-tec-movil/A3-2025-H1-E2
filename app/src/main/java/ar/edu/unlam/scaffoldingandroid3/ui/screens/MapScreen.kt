@@ -6,15 +6,25 @@ import android.widget.ZoomControls
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
@@ -30,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -77,7 +88,8 @@ fun MapScreen(controller: NavHostController, modifier: Modifier = Modifier){
 
             Icon(imageVector = if (state) Icons.Default.Close else Icons.Default.Add,
                 contentDescription = if (state) "Cerrar menu" else "Abrir menu",
-                tint = Color.Black)
+                tint = Color.Black,
+                modifier = Modifier.size(30.dp))
 
         }
 
@@ -109,8 +121,59 @@ fun MonumentMap(modifier: Modifier){
 @Composable
 fun NavMenu(navController : NavHostController){
 
-    //Se trata de un box compuesto por columnas y filas de BotonMenuNav(controller, ruta, icon)
-    BotonMenuNav(controller = navController, ruta = NavigationRoutes.ProfileScreen, icon = Icons.Default.AccountCircle)
+    //Se trata de ua columna compuesta por filas de BotonMenuNav(controller, ruta, icon, descripcion)
+    //BotonMenuNav(controller = navController, ruta = NavigationRoutes.ProfileScreen, icon = Icons.Default.AccountCircle, descripcion = "Perfil")
+
+    val iconos = listOf<ImageVector>(
+        Icons.Default.AccountCircle,
+        Icons.Default.Create,
+        Icons.Default.Settings,
+        Icons.Default.Notifications,
+        Icons.Default.Share,
+        Icons.Default.Place,
+        Icons.Default.Favorite,
+        )
+
+
+  Column (modifier = Modifier.fillMaxSize().padding(30.dp)){
+
+      Spacer(modifier = Modifier.size(70.dp))
+
+      Row (modifier = Modifier.fillMaxWidth()){
+
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.ProfileScreen, icon = iconos[0], descripcion = "Perfil")
+          Spacer(modifier = Modifier.size(25.dp))
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.CreateMonument, icon = iconos[1], descripcion = "Crear Monumento")
+          Spacer(modifier = Modifier.size(25.dp))
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.AjustesScreen, icon = iconos[2], descripcion = "Ajustes")
+
+      }
+
+      Spacer(modifier = Modifier.size(60.dp))
+
+      Row (modifier = Modifier.fillMaxWidth()){
+
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.NotificacionesScreen, icon = iconos[3], descripcion = "Notificaciones")
+          Spacer(modifier = Modifier.size(25.dp))
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.ComunidadScreen, icon = iconos[4], descripcion = "Comunidad")
+          Spacer(modifier = Modifier.size(25.dp))
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.MonumentosScreen, icon = iconos[5], descripcion = "Monumentos")
+
+      }
+
+      Spacer(modifier = Modifier.size(60.dp))
+
+      Row (modifier = Modifier.fillMaxWidth()){
+
+          BotonMenuNav(controller = navController, ruta = NavigationRoutes.AlbumScreen, icon = iconos[6], descripcion = "Album")
+          Spacer(modifier = Modifier.size(25.dp))
+          //BotonMenuNav de rutas
+          Spacer(modifier = Modifier.size(25.dp))
+          //Slot extra
+
+      }
+
+  }
 
 }
 

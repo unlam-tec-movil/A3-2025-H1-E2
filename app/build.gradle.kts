@@ -69,4 +69,12 @@ dependencies {
 
     // Coil
     implementation(libs.coil)
+
+    // Maps
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
+}
+
+hilt {
+    enableAggregatingTask = false
 }

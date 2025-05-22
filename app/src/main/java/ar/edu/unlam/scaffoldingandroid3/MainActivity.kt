@@ -11,40 +11,88 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.AjustesScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.ComunidadScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.CreateMonumentScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.MapScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.MonumentosScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.NotificacionesScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.ProfileScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+            val controller = rememberNavController()
+
             ScaffoldingAndroid3Theme {
+
+                val navBackStackEntry = controller.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry.value?.destination?.route
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding),
-                    )
+
+                    NavHost(navController = controller, startDestination = NavigationRoutes.MapScreen.route) {
+
+                     composable (NavigationRoutes.MapScreen.route){
+
+                         MapScreen(controller)
+
+                     }
+
+                        composable (NavigationRoutes.ProfileScreen.route) {
+
+                            ProfileScreen()
+
+
+                        }
+
+                        composable (NavigationRoutes.CreateMonument.route) {
+
+                            CreateMonumentScreen()
+
+                        }
+
+                        composable (NavigationRoutes.AjustesScreen.route) {
+
+                            AjustesScreen()
+
+                        }
+
+                        composable (NavigationRoutes.NotificacionesScreen.route) {
+
+                            NotificacionesScreen()
+
+                        }
+
+                        composable (NavigationRoutes.ComunidadScreen.route) {
+
+                            ComunidadScreen()
+
+                        }
+
+                        composable (NavigationRoutes.MonumentosScreen.route) {
+
+                            MonumentosScreen()
+
+                        }
+
+                        composable (NavigationRoutes.AlbumScreen.route) {  }
+
+
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(
-    name: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ScaffoldingAndroid3Theme {
-        Greeting("Android")
     }
 }

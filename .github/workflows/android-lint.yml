@@ -1,6 +1,8 @@
 name: Scan with Android Linter
 run-name: ${{ github.actor }} protecting code quality! 🛡️
 
+permissions:
+  contents: read
 on:
   pull_request:
     branches:

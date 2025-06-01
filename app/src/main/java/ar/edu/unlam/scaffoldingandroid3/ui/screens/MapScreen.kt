@@ -1,6 +1,13 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Icon
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +32,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,43 +57,20 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MapScreen(
     controller: NavHostController,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        var state: Boolean by remember { mutableStateOf(false) }
-
-        Box(
-            modifier =
-                modifier
-                    .fillMaxWidth()
-                    .height(725.dp),
-        ) {
-            // Mapa
-            if (state) {
-                NavMenu(controller)
-            } else {
-                MonumentMap(modifier)
-            }
-        }
-
-        // Boton Menu
-        // su simbolo es un "+", al presionarlo se abre el menu y cambia a un "x"
-
-        Button(
+    var state: Boolean by remember { mutableStateOf(false) }
+    Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
+        FloatingActionButton(
             onClick = { state = !state },
             shape = CircleShape,
             modifier = Modifier.size(64.dp),
-            contentPadding = PaddingValues(0.dp),
-            colors =
-                ButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
-                    disabledContainerColor = Color.Gray,
-                    disabledContentColor = Color.Gray,
-                ),
+            containerColor = Color.White,
+            contentColor = Color.Black,
         ) {
             Icon(
                 imageVector = if (state) Icons.Default.Close else Icons.Default.Add,
@@ -92,6 +78,31 @@ fun MapScreen(
                 tint = Color.Black,
                 modifier = Modifier.size(30.dp),
             )
+        }
+    }) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            AnimatedVisibility(visible = !state, enter = fadeIn(), exit = fadeOut()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .animateEnterExit(enter = slideInVertically(), exit = slideOutVertically())
+                ) {
+                    MonumentMap(modifier = Modifier.fillMaxSize())
+                }
+            }
+            AnimatedVisibility(visible = state, enter = fadeIn(), exit = fadeOut()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .animateEnterExit(enter = slideInVertically(), exit = slideOutVertically())
+                ) {
+                    NavMenu(controller)
+                }
+            }
         }
     }
 }
@@ -124,16 +135,6 @@ fun NavMenu(navController: NavHostController) {
     // BotonMenuNav(controller = navController, ruta = NavigationRoutes.ProfileScreen, icon =
     // Icons.Default.AccountCircle, descripcion = "Perfil")
 
-    val iconos =
-        listOf<ImageVector>(
-            Icons.Default.AccountCircle,
-            Icons.Default.Create,
-            Icons.Default.Settings,
-            Icons.Default.Notifications,
-            Icons.Default.Share,
-            Icons.Default.Place,
-            Icons.Default.Favorite,
-        )
 
     Column(
         modifier =

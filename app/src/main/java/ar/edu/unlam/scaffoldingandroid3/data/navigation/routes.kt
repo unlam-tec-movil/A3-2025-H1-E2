@@ -1,7 +1,8 @@
 package ar.edu.unlam.scaffoldingandroid3.data.navigation
 
-sealed class NavigationRoutes(val route: String) {
-
+sealed class NavigationRoutes(
+    val route: String,
+) {
     data object MapScreen : NavigationRoutes(route = "maps")
 
     data object ProfileScreen : NavigationRoutes(route = "profile")
@@ -17,6 +18,4 @@ sealed class NavigationRoutes(val route: String) {
     data object MonumentosScreen : NavigationRoutes(route = "monumentos")
 
     data object AlbumScreen : NavigationRoutes(route = "album")
-
-
 }

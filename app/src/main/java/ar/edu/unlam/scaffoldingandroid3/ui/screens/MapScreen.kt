@@ -1,5 +1,6 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Icon
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -50,6 +51,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MapScreen(
     controller: NavHostController,

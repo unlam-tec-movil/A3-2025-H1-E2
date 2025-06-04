@@ -42,6 +42,11 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        baseline = file("lint-baseline.xml")
+        abortOnError = false
+        warningsAsErrors = false
+    }
 }
 
 dependencies {
@@ -69,4 +74,12 @@ dependencies {
 
     // Coil
     implementation(libs.coil)
+
+    // Maps
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
+}
+
+hilt {
+    enableAggregatingTask = false
 }

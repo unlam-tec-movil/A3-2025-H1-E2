@@ -1,7 +1,9 @@
 package ar.edu.unlam.scaffoldingandroid3.data.di
 
 import ar.edu.unlam.scaffoldingandroid3.data.repository.LocalMonumentRepository
+import ar.edu.unlam.scaffoldingandroid3.domain.services.GetLocationService
 import ar.edu.unlam.scaffoldingandroid3.domain.services.GetMonumentosService
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetLocationUseCase
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
 import dagger.Module
 import dagger.Provides
@@ -16,4 +18,8 @@ object HiltModule {
     @Provides
     fun provideGetMonumentosUseCase(monumentRepository: LocalMonumentRepository): GetMonumentosUseCase =
         GetMonumentosService(monumentRepository)
+
+    @Singleton
+    @Provides
+    fun provideGetLocationUseCase(): GetLocationUseCase = GetLocationService()
 }

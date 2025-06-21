@@ -14,12 +14,12 @@ class LocalMonumentRepository
             listOf<Monumento>(
                 Monumento(
                     name = "Obelisco",
-                    latLng = LatLng(-34.6, -58.8),
+                    latLng = LatLng(-34.60362419480108, -58.38162366047333),
                     descripcion = "Obelisco de Buenos Aires, Argentina",
                 ),
                 Monumento(
                     name = "Estatua de San Martin Moron",
-                    latLng = LatLng(-34.65, -58.62),
+                    latLng = LatLng(-34.65116179199579, -58.62194483163555),
                     descripcion = "Estatua de San Martin de la Plaza Del Libertador Gran San Martin",
                 ),
             )

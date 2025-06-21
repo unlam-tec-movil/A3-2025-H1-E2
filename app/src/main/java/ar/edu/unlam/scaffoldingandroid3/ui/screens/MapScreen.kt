@@ -1,6 +1,7 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
 import android.annotation.SuppressLint
+import android.location.Location
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -30,6 +32,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,14 +46,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import ar.edu.unlam.scaffoldingandroid3.ui.components.BotonMenuNav
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -60,6 +65,33 @@ fun MapScreen(
     onRequestCameraPermission: Unit,
     modifier: Modifier = Modifier,
     viewModel: MapScreenViewModel = hiltViewModel(),
+) {
+    val uiState = viewModel.uiState.collectAsState()
+
+    Box(modifier = modifier.fillMaxSize()) {
+        when (val state = uiState.value.mapUiState) {
+            is MapScreenViewModel.MapScreenUi.Error ->
+                ErrorScreen(
+                    modifier =
+                        Modifier
+                            .wrapContentSize()
+                            .align(Alignment.Center),
+                    error = "Error",
+                )
+
+            MapScreenViewModel.MapScreenUi.Loading -> LoadingScreen()
+            is MapScreenViewModel.MapScreenUi.Success ->
+                MapScreenSuccess(modifier, controller, viewModel.location, state.data)
+        }
+    }
+}
+
+@Composable
+private fun MapScreenSuccess(
+    modifier: Modifier,
+    controller: NavHostController,
+    location: Location?,
+    data: List<Monumento>,
 ) {
     var state: Boolean by remember { mutableStateOf(false) }
     Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
@@ -87,9 +119,12 @@ fun MapScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .animateEnterExit(enter = slideInVertically(), exit = slideOutVertically()),
+                            .animateEnterExit(
+                                enter = slideInVertically(),
+                                exit = slideOutVertically(),
+                            ),
                 ) {
-                    MonumentMap(modifier = Modifier.fillMaxSize())
+                    MonumentMap(modifier = Modifier.fillMaxSize(), location, data)
                 }
             }
             AnimatedVisibility(visible = state, enter = fadeIn(), exit = fadeOut()) {
@@ -97,7 +132,10 @@ fun MapScreen(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .animateEnterExit(enter = slideInVertically(), exit = slideOutVertically()),
+                            .animateEnterExit(
+                                enter = slideInVertically(),
+                                exit = slideOutVertically(),
+                            ),
                 ) {
                     NavMenu(controller)
                 }
@@ -107,22 +145,37 @@ fun MapScreen(
 }
 
 @Composable
-fun MonumentMap(modifier: Modifier) {
+fun MonumentMap(
+    modifier: Modifier,
+    userLocation: Location?,
+    data: List<Monumento>,
+) {
     val cameraPositionState =
         rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(LatLng(-34.0, 151.0), 10f)
+            if (userLocation != null) {
+                position =
+                    CameraPosition.fromLatLngZoom(
+                        LatLng(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                        ),
+                        10f,
+                    )
+            }
         }
 
     GoogleMap(
         modifier = modifier,
         cameraPositionState = cameraPositionState,
+        uiSettings = MapUiSettings(zoomControlsEnabled = false),
     ) {
-        // Es un ejemplo
-        @Composable {
+        // La idea es manejar el flujo de la camara al tocar el marker luego.
+        // Eso se puede realizar con MarkerInfoWindowContent
+        data.forEach {
+            val dataState = rememberMarkerState(position = it.latLng)
             Marker(
-                state = MarkerState(position = LatLng(-34.0, 151.0)),
-                title = "Sídney",
-                snippet = "Marker en Sídney",
+                state = dataState,
+                title = it.name,
             )
         }
     }

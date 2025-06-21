@@ -1,7 +1,6 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.Icon
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,9 +40,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.components.BotonMenuNav
+import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -55,7 +56,10 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun MapScreen(
     controller: NavHostController,
+    hasCameraPermission: Boolean,
+    onRequestCameraPermission: Unit,
     modifier: Modifier = Modifier,
+    viewModel: MapScreenViewModel = hiltViewModel(),
 ) {
     var state: Boolean by remember { mutableStateOf(false) }
     Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {

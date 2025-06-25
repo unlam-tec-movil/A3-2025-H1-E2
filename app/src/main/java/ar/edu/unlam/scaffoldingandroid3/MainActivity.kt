@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.AjustesScreen
@@ -59,13 +58,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val locationPermission by remember { hasFineLocationPermission }
-            val cameraPermission by remember { hasCameraPermission }
+            //val cameraPermission by remember { hasCameraPermission }
 
             val controller = rememberNavController()
 
             ScaffoldingAndroid3Theme {
-                val navBackStackEntry = controller.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry.value?.destination?.route
+                //val navBackStackEntry = controller.currentBackStackEntryAsState()
+                //val currentRoute = navBackStackEntry.value?.destination?.route
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
@@ -75,7 +74,12 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(NavigationRoutes.MapScreen.route) {
                             if (locationPermission) {
-                                MapScreen(controller, cameraPermission, requestCameraPermission(), locationPermission)
+                                MapScreen(
+                                    controller,
+                                    //cameraPermission,
+                                    //requestCameraPermission(),
+                                    locationPermission
+                                )
                             }
                         }
 
@@ -114,9 +118,9 @@ class MainActivity : ComponentActivity() {
         locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    private fun requestCameraPermission() {
+   /* private fun requestCameraPermission() {
         cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-    }
+    }*/
 
     /*
     Esta funcion pide ambos permisos, la dejo comentada porque puede ser de utilidad aunque se pidan en casos separados

@@ -53,19 +53,19 @@ import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
-import com.google.maps.android.compose.MapProperties
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MapScreen(
     controller: NavHostController,
-    hasCameraPermission: Boolean,
-    onRequestCameraPermission: Unit,
+   // hasCameraPermission: Boolean,
+   // onRequestCameraPermission: Unit,
     hasLocationPermission: Boolean,
     modifier: Modifier = Modifier,
     viewModel: MapScreenViewModel = hiltViewModel(),
@@ -123,7 +123,8 @@ private fun MapScreenSuccess(
         }
     }) { innerPadding ->
         Column(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

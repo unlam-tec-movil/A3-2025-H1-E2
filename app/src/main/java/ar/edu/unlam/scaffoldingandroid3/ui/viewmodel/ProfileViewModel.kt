@@ -21,7 +21,7 @@ class ProfileViewModel
 ) : ViewModel() {
 
     private val _monumentos = MutableStateFlow<List<Monumento>>(emptyList())
-    val monumentos:  StateFlow<List<Monumento>> = _monumentos.asStateFlow()
+    val monumentos: StateFlow<List<Monumento>> = _monumentos.asStateFlow()
 
     private val _usuario = MutableStateFlow(
         Usuario(name = "", score = 0, level = 1, emptyList())

@@ -5,11 +5,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class GetUsuarioScoreUseCase @Inject constructor(
-    private val getMonumentosUseCase: GetMonumentosUseCase
+class GetUsuarioScoreUseCase
+    @Inject
+    constructor(
+    private val getMonumentosUseCase: GetMonumentosUseCase,
 ) {
     suspend operator fun invoke(): Flow<Usuario> {
-        val monumentosDescubiertos = setOf(1,2)
+        val monumentosDescubiertos = setOf(1, 2)
 
         return getMonumentosUseCase.getMonumentos().map { lista ->
             val descubiertos = lista.filter { it.idMonumento in monumentosDescubiertos }
@@ -20,7 +22,7 @@ class GetUsuarioScoreUseCase @Inject constructor(
                 name = "Lucas",
                 score = puntaje,
                 level = nivel,
-                monumentosDescubiertos = descubiertos
+                monumentosDescubiertos = descubiertos,
             )
         }
     }

@@ -7,9 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetMonumentosService
-    @Inject
-    constructor(
-        private val monumentoRepository: LocalMonumentRepository,
-    ) : GetMonumentosUseCase {
-        override suspend fun getMonumentos(): Flow<List<Monumento>> = monumentoRepository.getMonumentos()
-    }
+@Inject
+constructor(
+    private val monumentoRepository: LocalMonumentRepository,
+) : GetMonumentosUseCase {
+    override suspend fun getMonumentos(): Flow<List<Monumento>> =
+        monumentoRepository.getMonumentos()
+}

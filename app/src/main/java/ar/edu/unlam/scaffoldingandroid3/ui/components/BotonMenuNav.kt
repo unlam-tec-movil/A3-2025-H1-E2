@@ -1,6 +1,5 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size

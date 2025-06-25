@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(NavigationRoutes.ProfileScreen.route) {
-                            ProfileScreen()
+                            ProfileScreen(controller)
                         }
 
                         composable(NavigationRoutes.CreateMonument.route) {

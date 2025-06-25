@@ -32,6 +32,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,13 +50,15 @@ import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import ar.edu.unlam.scaffoldingandroid3.ui.components.BotonMenuNav
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
-import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import com.google.maps.android.compose.MapProperties
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -63,10 +66,19 @@ fun MapScreen(
     controller: NavHostController,
     hasCameraPermission: Boolean,
     onRequestCameraPermission: Unit,
+    hasLocationPermission: Boolean,
     modifier: Modifier = Modifier,
     viewModel: MapScreenViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
+
+    LaunchedEffect(hasLocationPermission) {
+        if (hasLocationPermission) {
+            viewModel.cargarUbicacion(context, true)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         when (val state = uiState.value.mapUiState) {
@@ -111,7 +123,8 @@ private fun MapScreenSuccess(
         }
     }) { innerPadding ->
         Column(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize()
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             AnimatedVisibility(visible = !state, enter = fadeIn(), exit = fadeOut()) {
@@ -150,7 +163,7 @@ fun MonumentMap(
     userLocation: Location?,
     data: List<Monumento>,
 ) {
-    val cameraPositionState =
+    /*val cameraPositionState =
         rememberCameraPositionState {
             if (userLocation != null) {
                 position =
@@ -162,13 +175,35 @@ fun MonumentMap(
                         10f,
                     )
             }
+        }*/
+
+    val cameraPositionState = rememberCameraPositionState()
+    // enfoca el mapa a la ubicacion actual
+
+    LaunchedEffect(userLocation) {
+        userLocation?.let {
+            cameraPositionState.animate(
+                update = CameraUpdateFactory.newLatLngZoom(
+                    LatLng(userLocation.latitude, userLocation.longitude),
+                    10f
+                ),
+                durationMs = 1000
+            )
         }
+    }
+
+    val mapProperties = MapProperties(
+        isMyLocationEnabled = userLocation != null
+    )
 
     GoogleMap(
         modifier = modifier,
         cameraPositionState = cameraPositionState,
+        properties = mapProperties,
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
     ) {
+
+
         // La idea es manejar el flujo de la camara al tocar el marker luego.
         // Eso se puede realizar con MarkerInfoWindowContent
         data.forEach {

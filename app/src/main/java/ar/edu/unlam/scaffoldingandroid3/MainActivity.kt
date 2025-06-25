@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var locationPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var cameraPermissionLauncher: ActivityResultLauncher<String>
 
-    private var hasCoarseLocationPermission = mutableStateOf(false)
+    private var hasFineLocationPermission = mutableStateOf(false)
     private var hasCameraPermission = mutableStateOf(false)
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission(),
             ) { isGranted ->
-                hasCoarseLocationPermission.value = isGranted
+                hasFineLocationPermission.value = isGranted
             }
 
         cameraPermissionLauncher =
@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
         requestLocationPermission()
 
         setContent {
-            val locationPermission by remember { hasCoarseLocationPermission }
+            val locationPermission by remember { hasFineLocationPermission }
             val cameraPermission by remember { hasCameraPermission }
 
             val controller = rememberNavController()
@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(NavigationRoutes.MapScreen.route) {
                             if (locationPermission) {
-                                MapScreen(controller, cameraPermission, requestCameraPermission())
+                                MapScreen(controller, cameraPermission, requestCameraPermission(), locationPermission)
                             }
                         }
 
@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun requestLocationPermission() {
-        locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_COARSE_LOCATION)
+        locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     private fun requestCameraPermission() {

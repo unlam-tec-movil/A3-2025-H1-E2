@@ -9,8 +9,7 @@ class GetUsuarioScoreUseCase @Inject constructor(
     private val getMonumentosUseCase: GetMonumentosUseCase
 ) {
     suspend operator fun invoke(): Flow<Usuario> {
-        // Simulamos los nombres de monumentos descubiertos por el usuario
-        val monumentosDescubiertos = setOf(1)
+        val monumentosDescubiertos = setOf(1,2)
 
         return getMonumentosUseCase.getMonumentos().map { lista ->
             val descubiertos = lista.filter { it.idMonumento in monumentosDescubiertos }

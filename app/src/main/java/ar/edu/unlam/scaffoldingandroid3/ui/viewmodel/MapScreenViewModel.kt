@@ -12,7 +12,6 @@ import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,8 +33,15 @@ class MapScreenViewModel
         private val _location = mutableStateOf<Location?>(null)
         val location get() = _location.value
 
+
         init {
             getMonumentos()
+        }
+
+        fun cargarUbicacion(context: Context, permisosConcedidos: Boolean) {
+            viewModelScope.launch {
+                _location.value = getLocationUseCase.getLocation(context, permisosConcedidos)
+            }
         }
 
         fun getLocation() {

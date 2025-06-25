@@ -32,11 +32,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import ar.edu.unlam.scaffoldingandroid3.R
 import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.Teal
+import ar.edu.unlam.scaffoldingandroid3.ui.theme.Gold
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.ProfileViewModel
+import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
+
 
 @Composable
 fun ProfileScreen(
@@ -88,12 +96,15 @@ fun ProfileScreen(
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(40.dp))
-            Text(
-                text = "Logros",
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp
-            )
+                Text(
+                    text = "Logros",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    modifier = Modifier.padding(start = 6.dp)
+                )
+
             Spacer(modifier = Modifier.height(15.dp))
+
             Box(contentAlignment = Alignment.Center) {
                 val progreso = if (monumentosTotales > 0) {
                     monumentosActuales / monumentosTotales.toFloat()
@@ -107,10 +118,19 @@ fun ProfileScreen(
                     modifier = Modifier.size(100.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "$monumentosActuales de $monumentosTotales",
-                    fontWeight = FontWeight.Bold
-                )
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_trophy), // o tu ícono personalizado
+                        contentDescription = "Trofeo",
+                        tint = Gold,
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Text(
+                        text = "$monumentosActuales de $monumentosTotales",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             FlowRow(
@@ -124,9 +144,9 @@ fun ProfileScreen(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = if (descubierto) Color.Black else Color.Gray,
+                            tint = if (descubierto) Gold else Color.Gray,
                             modifier = Modifier
-                                .size(30.dp),
+                                .size(40.dp),
                         )
                         Text(
                             text = monumento.name,
@@ -143,11 +163,11 @@ fun ProfileScreen(
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-/*fun ProfileScreenPreview() {
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
     ScaffoldingAndroid3Theme {
-        ProfileScreen()
+        val controller = NavHostController(context = LocalContext.current)
+        ProfileScreen(controller)
     }
 }
-*/

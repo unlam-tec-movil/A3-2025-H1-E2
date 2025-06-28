@@ -1,7 +1,6 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import ar.edu.unlam.scaffoldingandroid3.R
 import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.Gold
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
@@ -52,7 +47,7 @@ fun ProfileScreen(
     val usuario by viewModel.usuario.collectAsState()
 
     val monumentosTotales = monumentos.size
-    val monumentosActuales = usuario.monumentosDescubiertos.size
+    val monumentosActuales = usuario.monumentosDescubiertos
 
     // var state: Boolean by remember { mutableStateOf(false) }
 
@@ -96,7 +91,7 @@ fun ProfileScreen(
             )
             Spacer(modifier = modifier.height(40.dp))
             Text(
-                text = "Logros",
+                text = "Monumentos Cazados",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 modifier = modifier.padding(start = 6.dp),
@@ -104,56 +99,24 @@ fun ProfileScreen(
 
             Spacer(modifier = modifier.height(15.dp))
 
-            Box(contentAlignment = Alignment.Center) {
-                val progreso =
-                    if (monumentosTotales > 0) {
-                        monumentosActuales / monumentosTotales.toFloat()
-                    } else {
-                        0f
-                    }
-
-                CircularProgressIndicator(
-                    progress = { progreso },
-                    color = Teal,
-                    strokeWidth = 10.dp,
-                    trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
-                    modifier = modifier.size(100.dp),
-                )
-                Spacer(modifier = modifier.height(8.dp))
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_trophy), // o tu ícono personalizado
-                        contentDescription = "Trofeo",
-                        tint = Gold,
-                        modifier = modifier.size(30.dp),
-                    )
-                    Text(
-                        text = "$monumentosActuales de $monumentosTotales",
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
+            Spacer(modifier = modifier.height(8.dp))
 
             FlowRow(
                 modifier = modifier.padding(top = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                monumentos.forEach { monumento ->
-                    val descubierto =
-                        usuario.monumentosDescubiertos.any { it.name == monumento.name }
-
+                monumentosActuales.forEach {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = if (descubierto) Gold else Color.Gray,
+                            tint = Gold,
                             modifier =
                                 modifier
                                     .size(40.dp),
                         )
                         Text(
-                            text = monumento.name,
+                            text = it.name,
                             modifier =
                                 modifier
                                     .padding(12.dp),

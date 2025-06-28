@@ -183,10 +183,10 @@ private fun MapScreenSuccess(
                     },
                     transitionSpec = {
                         slideInVertically(
-                            initialOffsetY = { if (contentState) it else -it },
+                            initialOffsetY = { it },
                         ) with
                             slideOutVertically(
-                                targetOffsetY = { if (contentState) -it else it },
+                                targetOffsetY = { 0 },
                             )
                     },
                 )
@@ -251,9 +251,7 @@ fun MonumentMap(
         properties = mapProperties,
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
     ) {
-        // La idea es manejar el flujo de la camara al tocar el marker luego.
-        // Eso se puede realizar con MarkerInfoWindowContent
-
+        // Es un circulo celeste que le da la informacion visual al usuario de los monumentos que se encuentren cerca
         userLocation?.let {
             Circle(
                 center = LatLng(it.latitude, it.longitude),
@@ -264,11 +262,16 @@ fun MonumentMap(
             )
         }
 
+        // La idea es manejar el flujo de la camara al tocar el marker luego.
+        // Eso se puede realizar con MarkerInfoWindowContent
+
         monumentosCercanos.forEach {
-            Marker(
-                state = rememberMarkerState(position = it.latLng),
-                title = it.name,
-            )
+            if (!it.oculto) {
+                Marker(
+                    state = rememberMarkerState(position = it.latLng),
+                    title = it.name,
+                )
+            }
         }
     }
 }

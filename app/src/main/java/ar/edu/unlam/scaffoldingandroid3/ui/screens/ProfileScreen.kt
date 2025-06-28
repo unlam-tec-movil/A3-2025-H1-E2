@@ -36,18 +36,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import ar.edu.unlam.scaffoldingandroid3.R
-import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.Gold
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.Teal
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.ProfileViewModel
 
-
 @Composable
 fun ProfileScreen(
     controller: NavController,
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = hiltViewModel()
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val monumentos by viewModel.monumentos.collectAsState()
     val usuario by viewModel.usuario.collectAsState()
@@ -55,8 +54,7 @@ fun ProfileScreen(
     val monumentosTotales = monumentos.size
     val monumentosActuales = usuario.monumentosDescubiertos.size
 
-
-    //var state: Boolean by remember { mutableStateOf(false) }
+    // var state: Boolean by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -65,23 +63,25 @@ fun ProfileScreen(
                 onClick = { controller.navigate(NavigationRoutes.AlbumScreen.route) },
                 modifier = modifier.padding(12.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Teal,
-                    contentColor = Color.White
-                )
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Teal,
+                        contentColor = Color.White,
+                    ),
             ) {
                 Text(text = "Ver álbum")
             }
-        }, floatingActionButtonPosition = FabPosition.Center
+        },
+        floatingActionButtonPosition = FabPosition.Center,
     ) { innerPadding ->
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             Spacer(modifier = modifier.height(30.dp))
 
             Text(
@@ -99,22 +99,25 @@ fun ProfileScreen(
                 text = "Logros",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
-                modifier = modifier.padding(start = 6.dp)
+                modifier = modifier.padding(start = 6.dp),
             )
 
             Spacer(modifier = modifier.height(15.dp))
 
             Box(contentAlignment = Alignment.Center) {
-                val progreso = if (monumentosTotales > 0) {
-                    monumentosActuales / monumentosTotales.toFloat()
-                } else 0f
+                val progreso =
+                    if (monumentosTotales > 0) {
+                        monumentosActuales / monumentosTotales.toFloat()
+                    } else {
+                        0f
+                    }
 
                 CircularProgressIndicator(
                     progress = { progreso },
                     color = Teal,
                     strokeWidth = 10.dp,
                     trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
-                    modifier = modifier.size(100.dp)
+                    modifier = modifier.size(100.dp),
                 )
                 Spacer(modifier = modifier.height(8.dp))
 
@@ -123,18 +126,18 @@ fun ProfileScreen(
                         painter = painterResource(id = R.drawable.ic_trophy), // o tu ícono personalizado
                         contentDescription = "Trofeo",
                         tint = Gold,
-                        modifier = modifier.size(30.dp)
+                        modifier = modifier.size(30.dp),
                     )
                     Text(
                         text = "$monumentosActuales de $monumentosTotales",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
 
             FlowRow(
                 modifier = modifier.padding(top = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 monumentos.forEach { monumento ->
                     val descubierto =
@@ -145,21 +148,20 @@ fun ProfileScreen(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
                             tint = if (descubierto) Gold else Color.Gray,
-                            modifier = modifier
-                                .size(40.dp),
+                            modifier =
+                                modifier
+                                    .size(40.dp),
                         )
                         Text(
                             text = monumento.name,
-                            modifier = modifier
-                                .padding(12.dp)
+                            modifier =
+                                modifier
+                                    .padding(12.dp),
                         )
                     }
-
                 }
             }
-
         }
-
     }
 }
 

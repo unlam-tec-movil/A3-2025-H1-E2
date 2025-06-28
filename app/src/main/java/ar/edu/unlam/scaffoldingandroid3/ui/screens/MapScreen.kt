@@ -2,11 +2,12 @@ package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
 import android.annotation.SuppressLint
 import android.location.Location
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,17 +43,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.R
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import ar.edu.unlam.scaffoldingandroid3.ui.components.BotonMenuNav
+import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -59,13 +67,12 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MapScreen(
     controller: NavHostController,
-   // hasCameraPermission: Boolean,
-   // onRequestCameraPermission: Unit,
+    // hasCameraPermission: Boolean,
+    // onRequestCameraPermission: Unit,
     hasLocationPermission: Boolean,
     modifier: Modifier = Modifier,
     viewModel: MapScreenViewModel = hiltViewModel(),
@@ -74,9 +81,17 @@ fun MapScreen(
 
     val context = LocalContext.current
 
+    val cameraPositionState = rememberCameraPositionState()
+
     LaunchedEffect(hasLocationPermission) {
         if (hasLocationPermission) {
-            viewModel.cargarUbicacion(context, true)
+            viewModel.cargarUbicacionMonumentos(context, true)
+            viewModel.comenzarActualizacionesUbicacion(context, true)
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.detenerUbicacion(context)
         }
     }
 
@@ -93,66 +108,88 @@ fun MapScreen(
 
             MapScreenViewModel.MapScreenUi.Loading -> LoadingScreen()
             is MapScreenViewModel.MapScreenUi.Success ->
-                MapScreenSuccess(modifier, controller, viewModel.location, state.data)
+                MapScreenSuccess(modifier, controller, state.location, state.data, cameraPositionState)
         }
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun MapScreenSuccess(
     modifier: Modifier,
     controller: NavHostController,
     location: Location?,
     data: List<Monumento>,
+    cameraPositionState: CameraPositionState,
 ) {
-    var state: Boolean by remember { mutableStateOf(false) }
+    var contentState by remember { mutableStateOf(false) }
+
     Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
         FloatingActionButton(
-            onClick = { state = !state },
+            onClick = {
+                contentState = !contentState
+            },
             shape = CircleShape,
             modifier = Modifier.size(64.dp),
             containerColor = Color.White,
             contentColor = Color.Black,
         ) {
             Icon(
-                imageVector = if (state) Icons.Default.Close else Icons.Default.Add,
-                contentDescription = if (state) "Cerrar menu" else "Abrir menu",
+                imageVector = if (contentState) Icons.Default.Close else Icons.Default.Add,
+                contentDescription = if (contentState) "Cerrar menu" else "Abrir menu",
                 tint = Color.Black,
                 modifier = Modifier.size(30.dp),
             )
         }
     }) { innerPadding ->
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AnimatedVisibility(visible = !state, enter = fadeIn(), exit = fadeOut()) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .animateEnterExit(
-                                enter = slideInVertically(),
-                                exit = slideOutVertically(),
-                            ),
-                ) {
-                    MonumentMap(modifier = Modifier.fillMaxSize(), location, data)
+            Box(modifier = Modifier.fillMaxSize()) {
+                MonumentMap(
+                    modifier = Modifier.fillMaxSize().zIndex(0f),
+                    userLocation = location,
+                    data = data,
+                    cameraPositionState = cameraPositionState,
+                )
+                // Esto es para evitar que se pueda interactuar con el mapa cuando se abre el menu
+                if (contentState) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .zIndex(0.9f)
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            awaitPointerEvent()
+                                        }
+                                    }
+                                },
+                    )
                 }
-            }
-            AnimatedVisibility(visible = state, enter = fadeIn(), exit = fadeOut()) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .animateEnterExit(
-                                enter = slideInVertically(),
-                                exit = slideOutVertically(),
-                            ),
-                ) {
-                    NavMenu(controller)
-                }
+
+                AnimatedContent(
+                    targetState = contentState,
+                    modifier = Modifier.fillMaxSize().zIndex(1f),
+                    content = { state ->
+                        if (state) {
+                            NavMenu(controller)
+                        }
+                    },
+                    transitionSpec = {
+                        slideInVertically(
+                            initialOffsetY = { if (contentState) it else -it },
+                        ) with
+                            slideOutVertically(
+                                targetOffsetY = { if (contentState) -it else it },
+                            )
+                    },
+                )
             }
         }
     }
@@ -163,6 +200,7 @@ fun MonumentMap(
     modifier: Modifier,
     userLocation: Location?,
     data: List<Monumento>,
+    cameraPositionState: CameraPositionState,
 ) {
     /*val cameraPositionState =
         rememberCameraPositionState {
@@ -178,24 +216,34 @@ fun MonumentMap(
             }
         }*/
 
-    val cameraPositionState = rememberCameraPositionState()
-    // enfoca el mapa a la ubicacion actual
-
     LaunchedEffect(userLocation) {
         userLocation?.let {
             cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(
-                    LatLng(userLocation.latitude, userLocation.longitude),
-                    10f
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(it.latitude, it.longitude),
+                    15f,
                 ),
-                durationMs = 1000
+                durationMs = 1000,
             )
         }
     }
 
-    val mapProperties = MapProperties(
-        isMyLocationEnabled = userLocation != null
-    )
+    val monumentosCercanos =
+        remember(userLocation, data) {
+            data.filter { monumento ->
+                val destino =
+                    Location("").apply {
+                        latitude = monumento.latLng.latitude
+                        longitude = monumento.latLng.longitude
+                    }
+                (userLocation?.distanceTo(destino) ?: Float.MAX_VALUE) < 500f
+            }
+        }
+
+    val mapProperties =
+        MapProperties(
+            isMyLocationEnabled = userLocation != null,
+        )
 
     GoogleMap(
         modifier = modifier,
@@ -203,14 +251,22 @@ fun MonumentMap(
         properties = mapProperties,
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
     ) {
-
-
         // La idea es manejar el flujo de la camara al tocar el marker luego.
         // Eso se puede realizar con MarkerInfoWindowContent
-        data.forEach {
-            val dataState = rememberMarkerState(position = it.latLng)
+
+        userLocation?.let {
+            Circle(
+                center = LatLng(it.latitude, it.longitude),
+                radius = 500.0,
+                fillColor = Color(0x330062D2),
+                strokeColor = Color(0xFF0062D2),
+                strokeWidth = 2f,
+            )
+        }
+
+        monumentosCercanos.forEach {
             Marker(
-                state = dataState,
+                state = rememberMarkerState(position = it.latLng),
                 title = it.name,
             )
         }
@@ -222,79 +278,82 @@ fun NavMenu(navController: NavHostController) {
     // Se trata de ua columna compuesta por filas de BotonMenuNav(controller, ruta, icon, descripcion)
     // BotonMenuNav(controller = navController, ruta = NavigationRoutes.ProfileScreen, icon =
     // Icons.Default.AccountCircle, descripcion = "Perfil")
-
-    Column(
+    Box(
         modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(30.dp),
+            Modifier.fillMaxSize(),
     ) {
-        Spacer(modifier = Modifier.size(70.dp))
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        Image(
+            painter = painterResource(id = R.drawable.menu_background),
+            contentDescription = "Menu Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(30.dp),
         ) {
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.ProfileScreen,
-                icon = Icons.Default.AccountCircle,
-                descripcion = "Perfil",
-            )
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.CreateMonument,
-                icon = Icons.Default.Create,
-                descripcion = "Crear",
-            )
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.AjustesScreen,
-                icon = Icons.Default.Settings,
-                descripcion = "Ajustes",
-            )
-        }
-        Spacer(modifier = Modifier.size(40.dp))
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.NotificacionesScreen,
-                icon = Icons.Default.Notifications,
-                descripcion = "Notificaciones",
-            )
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.ComunidadScreen,
-                icon = Icons.Default.Share,
-                descripcion = "Comunidad",
-            )
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.MonumentosScreen,
-                icon = Icons.Default.Place,
-                descripcion = "Monumentos",
-            )
-        }
-        Spacer(modifier = Modifier.size(40.dp))
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            BotonMenuNav(
-                controller = navController,
-                ruta = NavigationRoutes.AlbumScreen,
-                icon = Icons.Default.Favorite,
-                descripcion = "Album",
-            )
+            Spacer(modifier = Modifier.size(70.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.ProfileScreen,
+                    icon = Icons.Default.AccountCircle,
+                    descripcion = "Perfil",
+                )
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.CreateMonument,
+                    icon = Icons.Default.Create,
+                    descripcion = "Crear",
+                )
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.AjustesScreen,
+                    icon = Icons.Default.Settings,
+                    descripcion = "Ajustes",
+                )
+            }
+            Spacer(modifier = Modifier.size(40.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.NotificacionesScreen,
+                    icon = Icons.Default.Notifications,
+                    descripcion = "Notificaciones",
+                )
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.ComunidadScreen,
+                    icon = Icons.Default.Share,
+                    descripcion = "Comunidad",
+                )
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.MonumentosScreen,
+                    icon = Icons.Default.Place,
+                    descripcion = "Monumentos",
+                )
+            }
+            Spacer(modifier = Modifier.size(40.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                BotonMenuNav(
+                    controller = navController,
+                    ruta = NavigationRoutes.AlbumScreen,
+                    icon = Icons.Default.Favorite,
+                    descripcion = "Album",
+                )
+            }
         }
     }
-}
-
-@Preview
-@Composable
-fun NavMenuPreview() {
-    val controller = NavHostController(context = LocalContext.current)
-    NavMenu(controller)
 }

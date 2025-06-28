@@ -8,4 +8,5 @@ data class Monumento(
     val latLng: LatLng,
     val descripcion: String,
     val score: Int,
+    val oculto: Boolean,
 )

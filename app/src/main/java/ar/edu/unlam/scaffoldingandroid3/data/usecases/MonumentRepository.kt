@@ -1,4 +1,4 @@
-package ar.edu.unlam.scaffoldingandroid3.domain.usecases
+package ar.edu.unlam.scaffoldingandroid3.data.usecases
 
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import kotlinx.coroutines.flow.Flow

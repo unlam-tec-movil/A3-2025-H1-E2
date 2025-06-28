@@ -1,10 +1,12 @@
 package ar.edu.unlam.scaffoldingandroid3.data.di
 
 import ar.edu.unlam.scaffoldingandroid3.data.repository.LocalMonumentRepository
-import ar.edu.unlam.scaffoldingandroid3.domain.services.GetLocationService
 import ar.edu.unlam.scaffoldingandroid3.domain.services.GetMonumentosService
-import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetLocationUseCase
+import ar.edu.unlam.scaffoldingandroid3.domain.services.GetUsuarioScoreService
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetUsuarioScoreUseCase
+import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationService
+import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,4 +24,11 @@ object HiltModule {
     @Singleton
     @Provides
     fun provideGetLocationUseCase(): GetLocationUseCase = GetLocationService()
+
+    @Singleton
+    @Provides
+    fun provideGetUserScoreUseCase(): GetUsuarioScoreUseCase =
+        GetUsuarioScoreService(
+            getMonumentosUseCase = provideGetMonumentosUseCase(LocalMonumentRepository()),
+        )
 }

@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.AjustesScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.ComunidadScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.CreateMonumentScreen
@@ -58,13 +58,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val locationPermission by remember { hasFineLocationPermission }
-            //val cameraPermission by remember { hasCameraPermission }
+            // val cameraPermission by remember { hasCameraPermission }
 
             val controller = rememberNavController()
 
             ScaffoldingAndroid3Theme {
-                //val navBackStackEntry = controller.currentBackStackEntryAsState()
-                //val currentRoute = navBackStackEntry.value?.destination?.route
+                // val navBackStackEntry = controller.currentBackStackEntryAsState()
+                // val currentRoute = navBackStackEntry.value?.destination?.route
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
@@ -76,9 +76,9 @@ class MainActivity : ComponentActivity() {
                             if (locationPermission) {
                                 MapScreen(
                                     controller,
-                                    //cameraPermission,
-                                    //requestCameraPermission(),
-                                    locationPermission
+                                    // cameraPermission,
+                                    // requestCameraPermission(),
+                                    locationPermission,
                                 )
                             }
                         }

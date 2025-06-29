@@ -122,8 +122,12 @@ fun MapScreen(
             MapScreenViewModel.MapScreenUi.Loading -> LoadingScreen()
             is MapScreenViewModel.MapScreenUi.Success ->
                 MapScreenSuccess(
-                    modifier, controller, state.location, state.data, cameraPositionState,
-                    viewModel
+                    modifier,
+                    controller,
+                    state.location,
+                    state.data,
+                    cameraPositionState,
+                    viewModel,
                 )
         }
     }
@@ -137,7 +141,7 @@ private fun MapScreenSuccess(
     location: Location?,
     data: List<Monumento>,
     cameraPositionState: CameraPositionState,
-    viewModel: MapScreenViewModel
+    viewModel: MapScreenViewModel,
 ) {
     var contentState by remember { mutableStateOf(false) }
 
@@ -168,7 +172,9 @@ private fun MapScreenSuccess(
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 MonumentMap(
-                    modifier = Modifier.fillMaxSize().zIndex(0f),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zIndex(0f),
                     userLocation = location,
                     data = data,
                     cameraPositionState = cameraPositionState,
@@ -193,7 +199,9 @@ private fun MapScreenSuccess(
 
                 AnimatedContent(
                     targetState = contentState,
-                    modifier = Modifier.fillMaxSize().zIndex(1f),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zIndex(1f),
                     content = { state ->
                         if (state) {
                             NavMenu(controller)
@@ -203,9 +211,9 @@ private fun MapScreenSuccess(
                         slideInVertically(
                             initialOffsetY = { it },
                         ) with
-                            slideOutVertically(
-                                targetOffsetY = { 0 },
-                            )
+                                slideOutVertically(
+                                    targetOffsetY = { 0 },
+                                )
                     },
                 )
             }
@@ -241,15 +249,16 @@ fun MonumentMap(
     val photoFile = remember { mutableStateOf<File?>(null) }
     val pendingTakePicture = remember { mutableStateOf(false) }
 
-    val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result  ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(context, "¡Foto tomada!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
+    val takePictureLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                Toast.makeText(context, "¡Foto tomada!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
+            }
         }
-    }
 
     val requestCameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -323,56 +332,56 @@ fun MonumentMap(
                     state = rememberMarkerState(position = monumento.latLng),
                     title = monumento.name,
                     onClick = {
-                            if (viewModel.estaCerca(userLocation, monumento.latLng)) {
-                                try {
-                                    val file = File(
-                                        context.filesDir,
-                                        "monumento_${System.currentTimeMillis()}.jpg"
-                                    )
-                                    val uri = FileProvider.getUriForFile(
+                        if (viewModel.estaCerca(userLocation, monumento.latLng)) {
+                            try {
+                                val file = File(
+                                    context.filesDir,
+                                    "monumento_${System.currentTimeMillis()}.jpg"
+                                )
+                                val uri = FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.provider",
+                                    file
+                                )
+
+                                photoUri.value = uri
+                                photoFile.value = file
+
+                                if (ContextCompat.checkSelfPermission(
                                         context,
-                                        "${context.packageName}.provider",
-                                        file
-                                    )
-
-                                    photoUri.value = uri
-                                    photoFile.value = file
-
-                                    if (ContextCompat.checkSelfPermission(
-                                            context,
-                                            Manifest.permission.CAMERA
-                                        ) == PackageManager.PERMISSION_GRANTED
-                                    ) {
-                                        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                                            putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                        takePictureLauncher.launch(intent)
-                                    } else {
-                                        pendingTakePicture.value = true
-                                        requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                        Manifest.permission.CAMERA
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                        putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
-
-                                } catch (e: Exception) {
-                                    Log.e(
-                                        "CameraError",
-                                        "Error al abrir la cámara: ${e.message}",
-                                        e
-                                    )
-                                    Toast.makeText(
-                                        context,
-                                        "Error al abrir la cámara",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    takePictureLauncher.launch(intent)
+                                } else {
+                                    pendingTakePicture.value = true
+                                    requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                 }
-                            } else {
+
+                            } catch (e: Exception) {
+                                Log.e(
+                                    "CameraError",
+                                    "Error al abrir la cámara: ${e.message}",
+                                    e
+                                )
                                 Toast.makeText(
                                     context,
-                                    "Acércate un poco más al monumento",
+                                    "Error al abrir la cámara",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                            true
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Acércate un poco más al monumento",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        true
                     }
                 )
             }

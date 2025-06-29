@@ -100,14 +100,13 @@ class MapScreenViewModel
                 Location("").apply {
                     latitude = monumentoLatLng.latitude
                     longitude = monumentoLatLng.longitude
-            }
+                }
 
             val distancia = userLocation.distanceTo(monumentLocation)
             return distancia <= rango
         }
 
-
-    @Immutable
+        @Immutable
         sealed interface MapScreenUi {
             data object Loading : MapScreenUi
 

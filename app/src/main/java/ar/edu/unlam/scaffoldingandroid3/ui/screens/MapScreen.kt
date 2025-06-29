@@ -387,7 +387,7 @@ fun MonumentMap(
                             ).show()
                         }
                         true
-                    }
+                    },
                 )
             }
         }

@@ -16,6 +16,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -172,9 +173,10 @@ private fun MapScreenSuccess(
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 MonumentMap(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .zIndex(0f),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .zIndex(0f),
                     userLocation = location,
                     data = data,
                     cameraPositionState = cameraPositionState,
@@ -199,9 +201,10 @@ private fun MapScreenSuccess(
 
                 AnimatedContent(
                     targetState = contentState,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .zIndex(1f),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .zIndex(1f),
                     content = { state ->
                         if (state) {
                             NavMenu(controller)
@@ -210,7 +213,7 @@ private fun MapScreenSuccess(
                     transitionSpec = {
                         slideInVertically(
                             initialOffsetY = { it },
-                        ) with
+                        ) togetherWith
                                 slideOutVertically(
                                     targetOffsetY = { 0 },
                                 )
@@ -260,22 +263,24 @@ fun MonumentMap(
             }
         }
 
-    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted && pendingTakePicture.value) {
-            photoUri.value?.let { uri ->
-                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                    putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    val requestCameraPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+        ) { isGranted ->
+            if (isGranted && pendingTakePicture.value) {
+                photoUri.value?.let { uri ->
+                    val intent =
+                        Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                            putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    takePictureLauncher.launch(intent)
                 }
-                takePictureLauncher.launch(intent)
+                pendingTakePicture.value = false
+            } else {
+                Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
             }
-            pendingTakePicture.value = false
-        } else {
-            Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
         }
-    }
 
     LaunchedEffect(userLocation) {
         userLocation?.let {
@@ -334,16 +339,17 @@ fun MonumentMap(
                     onClick = {
                         if (viewModel.estaCerca(userLocation, monumento.latLng)) {
                             try {
-                                val file = File(
-                                    context.filesDir,
-                                    "monumento_${System.currentTimeMillis()}.jpg"
-                                )
-                                val uri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.provider",
-                                    file
-                                )
-
+                                val file =
+                                    File(
+                                        context.filesDir,
+                                        "monumento_${System.currentTimeMillis()}.jpg"
+                                    )
+                                val uri
+                                    = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        file
+                                    )
                                 photoUri.value = uri
                                 photoFile.value = file
 

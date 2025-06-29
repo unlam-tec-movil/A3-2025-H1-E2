@@ -89,21 +89,22 @@ class MapScreenViewModel
             getLocationUseCase.detenerActualizaciones(context)
         }
 
-    fun estaCerca(
-        userLocation: Location?,
-        monumentoLatLng: LatLng,
-        rango: Float = 50f
-    ): Boolean {
-        if (userLocation == null) return false
+        fun estaCerca(
+            userLocation: Location?,
+            monumentoLatLng: LatLng,
+            rango: Float = 50f,
+        ): Boolean {
+            if (userLocation == null) return false
 
-        val monumentLocation = Location("").apply {
-            latitude = monumentoLatLng.latitude
-            longitude = monumentoLatLng.longitude
+            val monumentLocation =
+                Location("").apply {
+                    latitude = monumentoLatLng.latitude
+                    longitude = monumentoLatLng.longitude
+            }
+
+            val distancia = userLocation.distanceTo(monumentLocation)
+            return distancia <= rango
         }
-
-        val distancia = userLocation.distanceTo(monumentLocation)
-        return distancia <= rango
-    }
 
 
     @Immutable

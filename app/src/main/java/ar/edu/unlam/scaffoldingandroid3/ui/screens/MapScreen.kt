@@ -357,33 +357,33 @@ fun MonumentMap(
                                         Manifest.permission.CAMERA,
                                     ) == PackageManager.PERMISSION_GRANTED
                                 ) {
-                                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                                        putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
+                                    val intent =
+                                        Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                            putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
                                     takePictureLauncher.launch(intent)
                                 } else {
                                     pendingTakePicture.value = true
                                     requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                                 }
-
                             } catch (e: Exception) {
                                 Log.e(
                                     "CameraError",
                                     "Error al abrir la cámara: ${e.message}",
-                                    e
+                                    e,
                                 )
                                 Toast.makeText(
                                     context,
                                     "Error al abrir la cámara",
-                                    Toast.LENGTH_SHORT
+                                    Toast.LENGTH_SHORT,
                                 ).show()
                             }
                         } else {
                             Toast.makeText(
                                 context,
                                 "Acércate un poco más al monumento",
-                                Toast.LENGTH_SHORT
+                                Toast.LENGTH_SHORT,
                             ).show()
                         }
                         true

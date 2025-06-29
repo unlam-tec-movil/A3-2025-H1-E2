@@ -132,7 +132,7 @@ fun ProfileScreenPreview() {
             controller,
             modifier = TODO(),
             innerPadding = TODO(),
-            viewModel = TODO()
+            viewModel = TODO(),
         )
     }
 }

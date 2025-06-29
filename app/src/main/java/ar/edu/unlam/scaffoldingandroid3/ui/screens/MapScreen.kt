@@ -373,18 +373,20 @@ fun MonumentMap(
                                     "Error al abrir la cámara: ${e.message}",
                                     e,
                                 )
-                                Toast.makeText(
-                                    context,
-                                    "Error al abrir la cámara",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Error al abrir la cámara",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
                             }
                         } else {
-                            Toast.makeText(
-                                context,
-                                "Acércate un poco más al monumento",
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Acércate un poco más al monumento",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
                         }
                         true
                     },

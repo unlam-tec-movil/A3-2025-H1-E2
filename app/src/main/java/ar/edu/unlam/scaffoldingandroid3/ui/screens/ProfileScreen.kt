@@ -1,8 +1,10 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -13,9 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +41,7 @@ import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.ProfileViewModel
 fun ProfileScreen(
     controller: NavController,
     modifier: Modifier = Modifier,
+    innerPadding: PaddingValues,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val monumentos by viewModel.monumentos.collectAsState()
@@ -51,33 +52,18 @@ fun ProfileScreen(
 
     // var state: Boolean by remember { mutableStateOf(false) }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        floatingActionButton = {
-            Button(
-                onClick = { controller.navigate(NavigationRoutes.AlbumScreen.route) },
-                modifier = modifier.padding(12.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Teal,
-                        contentColor = Color.White,
-                    ),
-            ) {
-                Text(text = "Ver álbum")
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
-    ) { innerPadding ->
+    Box(
+        modifier = modifier.fillMaxSize().padding(innerPadding),
+    ) {
         Column(
             modifier =
                 modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(10.dp),
+                    .padding(10.dp)
+                    .padding(top = 64.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 text = usuario.name,
@@ -89,17 +75,14 @@ fun ProfileScreen(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(modifier = modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             Text(
                 text = "Monumentos Cazados",
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 modifier = modifier.padding(start = 6.dp),
             )
-
-            Spacer(modifier = modifier.height(15.dp))
-
-            Spacer(modifier = modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             FlowRow(
                 modifier = modifier.padding(top = 24.dp),
@@ -111,19 +94,31 @@ fun ProfileScreen(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
                             tint = Gold,
-                            modifier =
-                                modifier
-                                    .size(40.dp),
+                            modifier = modifier.size(40.dp),
                         )
                         Text(
                             text = it.name,
-                            modifier =
-                                modifier
-                                    .padding(12.dp),
+                            modifier = modifier.padding(12.dp),
                         )
                     }
                 }
             }
+        }
+
+        Button(
+            onClick = { controller.navigate(NavigationRoutes.AlbumScreen.route) },
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = Teal,
+                    contentColor = Color.White,
+                ),
+        ) {
+            Text(text = "Ver álbum")
         }
     }
 }
@@ -133,6 +128,11 @@ fun ProfileScreen(
 fun ProfileScreenPreview() {
     ScaffoldingAndroid3Theme {
         val controller = NavHostController(context = LocalContext.current)
-        ProfileScreen(controller)
+        ProfileScreen(
+            controller,
+            modifier = TODO(),
+            innerPadding = TODO(),
+            viewModel = TODO()
+        )
     }
 }

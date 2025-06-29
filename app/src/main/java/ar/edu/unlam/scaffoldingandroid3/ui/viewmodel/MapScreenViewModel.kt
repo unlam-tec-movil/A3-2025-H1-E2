@@ -6,6 +6,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoEntity
+import ar.edu.unlam.scaffoldingandroid3.data.repository.PhotoRepository
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
 import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationUseCase
@@ -24,6 +26,7 @@ class MapScreenViewModel
     constructor(
         private val getMonumentosUseCase: GetMonumentosUseCase,
         private val getLocationUseCase: GetLocationUseCase,
+        private val photoRepository: PhotoRepository,
     ) : ViewModel() {
         data class MapScreenUiState(
             val mapUiState: MapScreenUi = MapScreenUi.Loading,
@@ -104,6 +107,12 @@ class MapScreenViewModel
 
             val distancia = userLocation.distanceTo(monumentLocation)
             return distancia <= rango
+        }
+
+        fun guardarFoto(path: String) {
+            viewModelScope.launch {
+                photoRepository.insertPhoto(PhotoEntity(filePath = path))
+            }
         }
 
         @Immutable

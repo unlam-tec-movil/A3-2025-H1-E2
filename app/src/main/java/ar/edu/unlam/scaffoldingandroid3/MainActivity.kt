@@ -15,9 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ar.edu.unlam.scaffoldingandroid3.ui.components.ApptopBar
 import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.AjustesScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.AlbumScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.ComunidadScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.CreateMonumentScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.MapScreen
@@ -62,11 +65,24 @@ class MainActivity : ComponentActivity() {
 
             val controller = rememberNavController()
 
+            val currentBackStackEntry by controller.currentBackStackEntryAsState()
+            val currentRoute = currentBackStackEntry?.destination?.route
+
             ScaffoldingAndroid3Theme {
                 // val navBackStackEntry = controller.currentBackStackEntryAsState()
                 // val currentRoute = navBackStackEntry.value?.destination?.route
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        if (currentRoute != NavigationRoutes.MapScreen.route) {
+                            ApptopBar(
+                                currentRoute = currentRoute ?: "",
+                                onBackClick = { controller.popBackStack() },
+                            )
+                        }
+                    },
+                ) { innerPadding ->
 
                     NavHost(
                         navController = controller,
@@ -84,7 +100,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(NavigationRoutes.ProfileScreen.route) {
-                            ProfileScreen(controller)
+                            ProfileScreen(controller, innerPadding = innerPadding)
                         }
 
                         composable(NavigationRoutes.CreateMonument.route) {
@@ -107,7 +123,9 @@ class MainActivity : ComponentActivity() {
                             MonumentosScreen()
                         }
 
-                        composable(NavigationRoutes.AlbumScreen.route) { }
+                        composable(NavigationRoutes.AlbumScreen.route) {
+                            AlbumScreen(innerPadding = innerPadding)
+                        }
                     }
                 }
             }

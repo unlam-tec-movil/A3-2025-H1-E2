@@ -257,6 +257,10 @@ fun MonumentMap(
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 Toast.makeText(context, "¡Foto tomada!", Toast.LENGTH_SHORT).show()
+
+                photoFile.value?.let { file ->
+                    viewModel.guardarFoto(file.absolutePath)
+                }
             } else {
                 Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
             }

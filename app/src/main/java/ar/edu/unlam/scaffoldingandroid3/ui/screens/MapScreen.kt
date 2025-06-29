@@ -17,7 +17,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -214,9 +213,9 @@ private fun MapScreenSuccess(
                         slideInVertically(
                             initialOffsetY = { it },
                         ) togetherWith
-                                slideOutVertically(
-                                    targetOffsetY = { 0 },
-                                )
+                            slideOutVertically(
+                                targetOffsetY = { 0 },
+                            )
                     },
                 )
             }
@@ -273,7 +272,7 @@ fun MonumentMap(
                         Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                             putExtra(MediaStore.EXTRA_OUTPUT, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
+                        }
                     takePictureLauncher.launch(intent)
                 }
                 pendingTakePicture.value = false
@@ -342,20 +341,20 @@ fun MonumentMap(
                                 val file =
                                     File(
                                         context.filesDir,
-                                        "monumento_${System.currentTimeMillis()}.jpg"
+                                        "monumento_${System.currentTimeMillis()}.jpg",
                                     )
-                                val uri
-                                    = FileProvider.getUriForFile(
+                                val uri =
+                                    FileProvider.getUriForFile(
                                         context,
                                         "${context.packageName}.provider",
-                                        file
+                                        file,
                                     )
                                 photoUri.value = uri
                                 photoFile.value = file
 
                                 if (ContextCompat.checkSelfPermission(
                                         context,
-                                        Manifest.permission.CAMERA
+                                        Manifest.permission.CAMERA,
                                     ) == PackageManager.PERMISSION_GRANTED
                                 ) {
                                     val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {

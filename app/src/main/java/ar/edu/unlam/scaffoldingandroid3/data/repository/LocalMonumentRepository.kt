@@ -36,6 +36,22 @@ class LocalMonumentRepository
                     score = 200,
                     oculto = false,
                 ),
+                Monumento(
+                    idMonumento = 4,
+                    name = "a",
+                    latLng = LatLng(-34.6093422671102, -58.63325318762128),
+                    descripcion = "a",
+                    score = 200,
+                    oculto = false,
+                ),
+                Monumento(
+                    idMonumento = 5,
+                    name = "a",
+                    latLng = LatLng(-34.60815899827839, -58.63484105539077),
+                    descripcion = "a",
+                    score = 200,
+                    oculto = false,
+                ),
             )
 
         override suspend fun getMonumentos(): Flow<List<Monumento>> {

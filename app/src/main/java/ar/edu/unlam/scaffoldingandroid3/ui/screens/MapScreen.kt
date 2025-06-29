@@ -1,7 +1,17 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
+import android.provider.MediaStore
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
@@ -49,6 +59,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import ar.edu.unlam.scaffoldingandroid3.R
@@ -66,6 +78,7 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import java.io.File
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -108,7 +121,10 @@ fun MapScreen(
 
             MapScreenViewModel.MapScreenUi.Loading -> LoadingScreen()
             is MapScreenViewModel.MapScreenUi.Success ->
-                MapScreenSuccess(modifier, controller, state.location, state.data, cameraPositionState)
+                MapScreenSuccess(
+                    modifier, controller, state.location, state.data, cameraPositionState,
+                    viewModel
+                )
         }
     }
 }
@@ -121,6 +137,7 @@ private fun MapScreenSuccess(
     location: Location?,
     data: List<Monumento>,
     cameraPositionState: CameraPositionState,
+    viewModel: MapScreenViewModel
 ) {
     var contentState by remember { mutableStateOf(false) }
 
@@ -155,6 +172,7 @@ private fun MapScreenSuccess(
                     userLocation = location,
                     data = data,
                     cameraPositionState = cameraPositionState,
+                    viewModel,
                 )
                 // Esto es para evitar que se pueda interactuar con el mapa cuando se abre el menu
                 if (contentState) {
@@ -201,6 +219,7 @@ fun MonumentMap(
     userLocation: Location?,
     data: List<Monumento>,
     cameraPositionState: CameraPositionState,
+    viewModel: MapScreenViewModel,
 ) {
     /*val cameraPositionState =
         rememberCameraPositionState {
@@ -215,6 +234,39 @@ fun MonumentMap(
                     )
             }
         }*/
+
+    val context = LocalContext.current
+
+    val photoUri = remember { mutableStateOf<Uri?>(null) }
+    val photoFile = remember { mutableStateOf<File?>(null) }
+    val pendingTakePicture = remember { mutableStateOf(false) }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result  ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "¡Foto tomada!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val requestCameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted && pendingTakePicture.value) {
+            photoUri.value?.let { uri ->
+                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                takePictureLauncher.launch(intent)
+            }
+            pendingTakePicture.value = false
+        } else {
+            Toast.makeText(context, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(userLocation) {
         userLocation?.let {
@@ -265,11 +317,63 @@ fun MonumentMap(
         // La idea es manejar el flujo de la camara al tocar el marker luego.
         // Eso se puede realizar con MarkerInfoWindowContent
 
-        monumentosCercanos.forEach {
-            if (!it.oculto) {
+        monumentosCercanos.forEach { monumento ->
+            if (!monumento.oculto) {
                 Marker(
-                    state = rememberMarkerState(position = it.latLng),
-                    title = it.name,
+                    state = rememberMarkerState(position = monumento.latLng),
+                    title = monumento.name,
+                    onClick = {
+                            if (viewModel.estaCerca(userLocation, monumento.latLng)) {
+                                try {
+                                    val file = File(
+                                        context.filesDir,
+                                        "monumento_${System.currentTimeMillis()}.jpg"
+                                    )
+                                    val uri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        file
+                                    )
+
+                                    photoUri.value = uri
+                                    photoFile.value = file
+
+                                    if (ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.CAMERA
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                            putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        takePictureLauncher.launch(intent)
+                                    } else {
+                                        pendingTakePicture.value = true
+                                        requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                    }
+
+                                } catch (e: Exception) {
+                                    Log.e(
+                                        "CameraError",
+                                        "Error al abrir la cámara: ${e.message}",
+                                        e
+                                    )
+                                    Toast.makeText(
+                                        context,
+                                        "Error al abrir la cámara",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Acércate un poco más al monumento",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            true
+                    }
                 )
             }
         }

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
 import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationUseCase
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -88,7 +89,24 @@ class MapScreenViewModel
             getLocationUseCase.detenerActualizaciones(context)
         }
 
-        @Immutable
+    fun estaCerca(
+        userLocation: Location?,
+        monumentoLatLng: LatLng,
+        rango: Float = 50f
+    ): Boolean {
+        if (userLocation == null) return false
+
+        val monumentLocation = Location("").apply {
+            latitude = monumentoLatLng.latitude
+            longitude = monumentoLatLng.longitude
+        }
+
+        val distancia = userLocation.distanceTo(monumentLocation)
+        return distancia <= rango
+    }
+
+
+    @Immutable
         sealed interface MapScreenUi {
             data object Loading : MapScreenUi
 

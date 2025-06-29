@@ -120,9 +120,8 @@ class MainActivity : ComponentActivity() {
 
    /* private fun requestCameraPermission() {
         cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-    }*/
+    }
 
-    /*
     Esta funcion pide ambos permisos, la dejo comentada porque puede ser de utilidad aunque se pidan en casos separados
 
     private fun requestPermissions() {

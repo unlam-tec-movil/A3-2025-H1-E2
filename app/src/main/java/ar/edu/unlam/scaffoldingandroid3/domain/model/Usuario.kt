@@ -2,8 +2,8 @@ package ar.edu.unlam.scaffoldingandroid3.domain.model
 
 data class Usuario(
     val name: String,
-    val score: Int,
-    val level: Int,
-    val monumentosDescubiertos: List<Monumento>,
+    var score: Int,
+    var level: Int,
+    val monumentosDescubiertos: MutableList<Monumento> = mutableListOf<Monumento>(),
     // Faltan foto que se pueda cambiar (var) y una biografia (opcional)
 )

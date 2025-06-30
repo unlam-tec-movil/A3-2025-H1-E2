@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import ar.edu.unlam.scaffoldingandroid3.data.repository.UserLocalRepository
 import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.Gold
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
@@ -46,7 +47,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val monumentos by viewModel.monumentos.collectAsState()
-    val usuario by viewModel.usuario.collectAsState()
+    val usuario = UserLocalRepository.usuario
 
     val monumentosTotales = monumentos.size
     val monumentosDelUsuario = usuario.monumentosDescubiertos

@@ -255,13 +255,18 @@ fun MonumentMap(
         animationSpec = tween(800),
     )
 
+    val monumentoIdSeleccionado = remember { mutableStateOf<Int?>(null) }
+
     val takePictureLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 Toast.makeText(context, "¡Monumento Cazado!", Toast.LENGTH_SHORT).show()
-                photoFile.value?.let { viewModel.guardarFoto(it.absolutePath) }
+                photoFile.value?.let {
+                    viewModel.guardarFoto(it.absolutePath)
+                    viewModel.monumentoCazado(monumentoIdSeleccionado.value)
+                }
             } else {
                 Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
             }
@@ -362,6 +367,7 @@ fun MonumentMap(
                                 )
                             photoUri.value = uri
                             photoFile.value = file
+                            monumentoIdSeleccionado.value = monumento.idMonumento
 
                             if (ContextCompat.checkSelfPermission(
                                     context,

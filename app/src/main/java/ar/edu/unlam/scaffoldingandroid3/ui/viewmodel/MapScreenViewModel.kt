@@ -9,8 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoEntity
 import ar.edu.unlam.scaffoldingandroid3.data.repository.PhotoRepository
+import ar.edu.unlam.scaffoldingandroid3.data.repository.UserLocalRepository
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.CazarMonumentoUseCase
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetUsuarioScoreUseCase
 import ar.edu.unlam.scaffoldingandroid3.infrastructure.sensor.ShakeSensor
 import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationUseCase
 import com.google.android.gms.maps.model.LatLng
@@ -31,6 +34,8 @@ class MapScreenViewModel
         private val getLocationUseCase: GetLocationUseCase,
         private val photoRepository: PhotoRepository,
         private val shakeSensor: ShakeSensor,
+        private val getUsuarioScoreUseCase: GetUsuarioScoreUseCase,
+        private val cazarMonumentoUseCase: CazarMonumentoUseCase,
     ) : ViewModel() {
         data class MapScreenUiState(
             val mapUiState: MapScreenUi = MapScreenUi.Loading,
@@ -47,6 +52,22 @@ class MapScreenViewModel
 
         private val _activarAnimacionSensor = mutableStateOf(false)
         val activarAnimacionSensor: State<Boolean> get() = _activarAnimacionSensor
+
+        fun monumentoCazado(idMonumento: Int?) {
+            viewModelScope.launch {
+                getMonumentosUseCase.getMonumentos().collect {
+                    it.forEach {
+                        if (it.idMonumento == idMonumento) {
+                            cazarMonumentoUseCase.cazarMonumento(
+                                usuario = UserLocalRepository.usuario,
+                                monumento = it,
+                            )
+                            UserLocalRepository.usuario.score += it.score
+                        }
+                    }
+                }
+            }
+        }
 
         fun activarCirculoTemporal() {
             _activarAnimacionSensor.value = true

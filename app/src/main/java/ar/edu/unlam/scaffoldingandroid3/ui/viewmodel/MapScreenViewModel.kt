@@ -3,6 +3,7 @@ package ar.edu.unlam.scaffoldingandroid3.ui.viewmodel
 import android.content.Context
 import android.location.Location
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,9 +11,11 @@ import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoEntity
 import ar.edu.unlam.scaffoldingandroid3.data.repository.PhotoRepository
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
+import ar.edu.unlam.scaffoldingandroid3.infrastructure.sensor.ShakeSensor
 import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationUseCase
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -27,6 +30,7 @@ class MapScreenViewModel
         private val getMonumentosUseCase: GetMonumentosUseCase,
         private val getLocationUseCase: GetLocationUseCase,
         private val photoRepository: PhotoRepository,
+        private val shakeSensor: ShakeSensor,
     ) : ViewModel() {
         data class MapScreenUiState(
             val mapUiState: MapScreenUi = MapScreenUi.Loading,
@@ -37,6 +41,20 @@ class MapScreenViewModel
 
         private val _location = mutableStateOf<Location?>(null)
         val location get() = _location.value
+
+        private val _mostrarOcultos = mutableStateOf(false)
+        val mostrarOcultos: State<Boolean> get() = _mostrarOcultos
+
+        private val _activarAnimacionSensor = mutableStateOf(false)
+        val activarAnimacionSensor: State<Boolean> get() = _activarAnimacionSensor
+
+        fun activarCirculoTemporal() {
+            _activarAnimacionSensor.value = true
+            viewModelScope.launch {
+                delay(1500)
+                _activarAnimacionSensor.value = false
+            }
+        }
 
         fun cargarUbicacionMonumentos(
             context: Context,
@@ -64,6 +82,18 @@ class MapScreenViewModel
             }
         }
 */
+
+        fun iniciarDeteccionSacudida() {
+            shakeSensor.start {
+                _mostrarOcultos.value = true
+                activarCirculoTemporal()
+            }
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            shakeSensor.stop()
+        }
 
         fun comenzarActualizacionesUbicacion(
             context: Context,
@@ -95,7 +125,7 @@ class MapScreenViewModel
         fun estaCerca(
             userLocation: Location?,
             monumentoLatLng: LatLng,
-            rango: Float = 50f,
+            rango: Float = 20f,
         ): Boolean {
             if (userLocation == null) return false
 

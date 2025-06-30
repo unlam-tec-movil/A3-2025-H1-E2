@@ -14,6 +14,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -69,6 +72,7 @@ import ar.edu.unlam.scaffoldingandroid3.ui.components.BotonMenuNav
 import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.Circle
@@ -100,6 +104,7 @@ fun MapScreen(
         if (hasLocationPermission) {
             viewModel.cargarUbicacionMonumentos(context, true)
             viewModel.comenzarActualizacionesUbicacion(context, true)
+            viewModel.iniciarDeteccionSacudida()
         }
     }
     DisposableEffect(Unit) {
@@ -231,36 +236,32 @@ fun MonumentMap(
     cameraPositionState: CameraPositionState,
     viewModel: MapScreenViewModel,
 ) {
-    /*val cameraPositionState =
-        rememberCameraPositionState {
-            if (userLocation != null) {
-                position =
-                    CameraPosition.fromLatLngZoom(
-                        LatLng(
-                            userLocation.latitude,
-                            userLocation.longitude,
-                        ),
-                        10f,
-                    )
-            }
-        }*/
-
     val context = LocalContext.current
 
     val photoUri = remember { mutableStateOf<Uri?>(null) }
     val photoFile = remember { mutableStateOf<File?>(null) }
     val pendingTakePicture = remember { mutableStateOf(false) }
 
+    val mostrarOcultos by viewModel.mostrarOcultos
+    val activarAnimacion by viewModel.activarAnimacionSensor
+
+    val animatedRadius by animateFloatAsState(
+        targetValue = if (activarAnimacion) 500f else 0f,
+        animationSpec = tween(800, easing = FastOutSlowInEasing),
+    )
+
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (activarAnimacion) 0.35f else 0f,
+        animationSpec = tween(800),
+    )
+
     val takePictureLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                Toast.makeText(context, "¡Foto tomada!", Toast.LENGTH_SHORT).show()
-
-                photoFile.value?.let { file ->
-                    viewModel.guardarFoto(file.absolutePath)
-                }
+                Toast.makeText(context, "¡Monumento Cazado!", Toast.LENGTH_SHORT).show()
+                photoFile.value?.let { viewModel.guardarFoto(it.absolutePath) }
             } else {
                 Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
             }
@@ -288,31 +289,30 @@ fun MonumentMap(
     LaunchedEffect(userLocation) {
         userLocation?.let {
             cameraPositionState.animate(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(it.latitude, it.longitude),
-                    15f,
-                ),
+                CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 15f),
                 durationMs = 1000,
             )
         }
     }
 
-    val monumentosCercanos =
-        remember(userLocation, data) {
+    val monumentosVisibles =
+        remember(userLocation, data, mostrarOcultos) {
             data.filter { monumento ->
-                val destino =
-                    Location("").apply {
-                        latitude = monumento.latLng.latitude
-                        longitude = monumento.latLng.longitude
-                    }
-                (userLocation?.distanceTo(destino) ?: Float.MAX_VALUE) < 500f
+                val distancia =
+                    userLocation?.let {
+                        val destino =
+                            Location("").apply {
+                                latitude = monumento.latLng.latitude
+                                longitude = monumento.latLng.longitude
+                            }
+                        it.distanceTo(destino)
+                    } ?: Float.MAX_VALUE
+
+                distancia < 500f && (!monumento.oculto || mostrarOcultos)
             }
         }
 
-    val mapProperties =
-        MapProperties(
-            isMyLocationEnabled = userLocation != null,
-        )
+    val mapProperties = MapProperties(isMyLocationEnabled = userLocation != null)
 
     GoogleMap(
         modifier = modifier,
@@ -320,7 +320,6 @@ fun MonumentMap(
         properties = mapProperties,
         uiSettings = MapUiSettings(zoomControlsEnabled = false),
     ) {
-        // Es un circulo celeste que le da la informacion visual al usuario de los monumentos que se encuentren cerca
         userLocation?.let {
             Circle(
                 center = LatLng(it.latitude, it.longitude),
@@ -329,73 +328,66 @@ fun MonumentMap(
                 strokeColor = Color(0xFF0062D2),
                 strokeWidth = 2f,
             )
-        }
 
-        // La idea es manejar el flujo de la camara al tocar el marker luego.
-        // Eso se puede realizar con MarkerInfoWindowContent
-
-        monumentosCercanos.forEach { monumento ->
-            if (!monumento.oculto) {
-                Marker(
-                    state = rememberMarkerState(position = monumento.latLng),
-                    title = monumento.name,
-                    onClick = {
-                        if (viewModel.estaCerca(userLocation, monumento.latLng)) {
-                            try {
-                                val file =
-                                    File(
-                                        context.filesDir,
-                                        "monumento_${System.currentTimeMillis()}.jpg",
-                                    )
-                                val uri =
-                                    FileProvider.getUriForFile(
-                                        context,
-                                        "${context.packageName}.provider",
-                                        file,
-                                    )
-                                photoUri.value = uri
-                                photoFile.value = file
-
-                                if (ContextCompat.checkSelfPermission(
-                                        context,
-                                        Manifest.permission.CAMERA,
-                                    ) == PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    val intent =
-                                        Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                                            putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                        }
-                                    takePictureLauncher.launch(intent)
-                                } else {
-                                    pendingTakePicture.value = true
-                                    requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                                }
-                            } catch (e: Exception) {
-                                Log.e(
-                                    "CameraError",
-                                    "Error al abrir la cámara: ${e.message}",
-                                    e,
-                                )
-                                Toast
-                                    .makeText(
-                                        context,
-                                        "Error al abrir la cámara",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                            }
-                        } else {
-                            Toast
-                                .makeText(
-                                    context,
-                                    "Acércate un poco más al monumento",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                        }
-                        true
-                    },
+            if (activarAnimacion) {
+                Circle(
+                    center = LatLng(it.latitude, it.longitude),
+                    radius = animatedRadius.toDouble(),
+                    fillColor = Color(0x882E004F).copy(alpha = animatedAlpha),
+                    strokeColor = Color(0xFF2E004F),
+                    strokeWidth = 2f,
                 )
             }
+        }
+
+        monumentosVisibles.forEach { monumento ->
+            Marker(
+                state = rememberMarkerState(position = monumento.latLng),
+                title = monumento.name,
+                icon =
+                    if (monumento.oculto) {
+                        BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
+                    } else {
+                        BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                    },
+                onClick = {
+                    if (viewModel.estaCerca(userLocation, monumento.latLng)) {
+                        try {
+                            val file = File(context.filesDir, "monumento_${System.currentTimeMillis()}.jpg")
+                            val uri =
+                                FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.provider",
+                                    file,
+                                )
+                            photoUri.value = uri
+                            photoFile.value = file
+
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA,
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                val intent =
+                                    Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                                        putExtra(MediaStore.EXTRA_OUTPUT, uri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                takePictureLauncher.launch(intent)
+                            } else {
+                                pendingTakePicture.value = true
+                                requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("CameraError", "Error al abrir la cámara: ${e.message}", e)
+                            Toast.makeText(context, "Error al abrir la cámara", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, "Acércate un poco más al monumento", Toast.LENGTH_SHORT).show()
+                    }
+                    true
+                },
+            )
         }
     }
 }

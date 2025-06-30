@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -48,7 +49,8 @@ fun ProfileScreen(
     val usuario by viewModel.usuario.collectAsState()
 
     val monumentosTotales = monumentos.size
-    val monumentosActuales = usuario.monumentosDescubiertos
+    val monumentosDelUsuario = usuario.monumentosDescubiertos
+    val filas = monumentosTotales.div(3)
 
     // var state: Boolean by remember { mutableStateOf(false) }
 
@@ -83,23 +85,26 @@ fun ProfileScreen(
                 modifier = modifier.padding(start = 6.dp),
             )
             Spacer(modifier = Modifier.height(15.dp))
-
-            FlowRow(
-                modifier = modifier.padding(top = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                monumentosActuales.forEach {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Gold,
-                            modifier = modifier.size(40.dp),
-                        )
-                        Text(
-                            text = it.name,
-                            modifier = modifier.padding(12.dp),
-                        )
+            LazyColumn {
+                items(filas) {
+                    FlowRow(
+                        modifier = modifier.padding(top = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        monumentosDelUsuario.forEach {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Gold,
+                                    modifier = modifier.size(40.dp),
+                                )
+                                Text(
+                                    text = it.name,
+                                    modifier = modifier.padding(12.dp),
+                                )
+                            }
+                        }
                     }
                 }
             }

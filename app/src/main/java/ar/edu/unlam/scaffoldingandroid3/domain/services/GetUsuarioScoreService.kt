@@ -1,40 +1,26 @@
 package ar.edu.unlam.scaffoldingandroid3.domain.services
 
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Usuario
-import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetUsuarioScoreUseCase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 class GetUsuarioScoreService
     @Inject
-    constructor(
-        private val getMonumentosUseCase: GetMonumentosUseCase,
-    ) : GetUsuarioScoreUseCase {
+    constructor() : GetUsuarioScoreUseCase {
         override suspend operator fun invoke(): Flow<Usuario> {
-            val monumentosDescubiertos = setOf(1, 2)
+            val usuarioHardcodeado = Usuario(name = "Guest", score = 0, level = 1, monumentosDescubiertos = emptyList())
 
-            return getMonumentosUseCase.getMonumentos().map { lista ->
-                val descubiertos = lista.filter { it.idMonumento in monumentosDescubiertos }
-                val puntaje = descubiertos.sumOf { it.score }
-                val nivel = calcularNivel(puntaje)
-
-                Usuario(
-                    name = "Guest",
-                    score = puntaje,
-                    level = nivel,
-                    monumentosDescubiertos = descubiertos,
-                )
-            }
+            return flowOf(usuarioHardcodeado)
         }
 
         override fun calcularNivel(score: Int): Int =
             when {
-                score >= 400 -> 5
-                score >= 200 -> 4
-                score >= 100 -> 3
-                score >= 50 -> 2
+                score >= 800 -> 5
+                score >= 400 -> 4
+                score >= 200 -> 3
+                score >= 100 -> 2
                 else -> 1
             }
     }

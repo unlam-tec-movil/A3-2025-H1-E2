@@ -9,4 +9,5 @@ data class Monumento(
     val descripcion: String,
     val score: Int,
     val oculto: Boolean,
+    val cazado: Boolean = false,
 )

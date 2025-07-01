@@ -1,12 +1,11 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,9 +33,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import ar.edu.unlam.scaffoldingandroid3.data.repository.UserLocalRepository
 import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.theme.BackgroundEnd
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.Gold
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
-import ar.edu.unlam.scaffoldingandroid3.ui.theme.Teal
 import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.ProfileViewModel
 
 @Composable
@@ -86,45 +85,41 @@ fun ProfileScreen(
                 modifier = modifier.padding(start = 6.dp),
             )
             Spacer(modifier = Modifier.height(15.dp))
-            LazyColumn {
-                items(filas) {
-                    FlowRow(
-                        modifier = modifier.padding(top = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        monumentosDelUsuario.forEach {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = Gold,
-                                    modifier = modifier.size(40.dp),
-                                )
-                                Text(
-                                    text = it.name,
-                                    modifier = modifier.padding(12.dp),
-                                )
-                            }
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().height(350.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                item {
+                    monumentosDelUsuario.forEach {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Gold,
+                                modifier = modifier.size(40.dp),
+                            )
+                            Text(
+                                text = it.name,
+                                modifier = modifier.padding(12.dp),
+                            )
                         }
                     }
                 }
             }
-        }
-
-        Button(
-            onClick = { controller.navigate(NavigationRoutes.AlbumScreen.route) },
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = Teal,
-                    contentColor = Color.White,
-                ),
-        ) {
-            Text(text = "Ver álbum")
+            Button(
+                onClick = { controller.navigate(NavigationRoutes.AlbumScreen.route) },
+                modifier =
+                    Modifier
+                        .padding(16.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = BackgroundEnd,
+                        contentColor = Color.White,
+                    ),
+            ) {
+                Text(text = "Ver álbum")
+            }
         }
     }
 }

@@ -12,5 +12,5 @@ val Pink40 = Color(0xFF7D5260)
 val Teal = Color(0xFF4CB6AC)
 val Gold = Color(0xFFFFD700)
 
-val BackgroundStart = Color(0xFF03292F)
-val BackgroundEnd = Color(0xFF03353F)
+val BackgroundStart = Color(0xFF062C31)
+val BackgroundEnd = Color(0xFF1F7F98)

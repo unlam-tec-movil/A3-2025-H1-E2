@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,6 +54,9 @@ class MapScreenViewModel
         private val _activarAnimacionSensor = mutableStateOf(false)
         val activarAnimacionSensor: State<Boolean> get() = _activarAnimacionSensor
 
+        private val _monumentosCazados = mutableStateListOf<Int>()
+        val monumentosCazados: List<Int> get() = _monumentosCazados
+
         fun monumentoCazado(idMonumento: Int?) {
             viewModelScope.launch {
                 getMonumentosUseCase.getMonumentos().collect {
@@ -63,6 +67,11 @@ class MapScreenViewModel
                                 monumento = it,
                             )
                             UserLocalRepository.usuario.score += it.score
+                            UserLocalRepository.usuario.level =
+                                getUsuarioScoreUseCase.calcularNivel(
+                                    UserLocalRepository.usuario.score,
+                                )
+                            _monumentosCazados.add(idMonumento)
                         }
                     }
                 }

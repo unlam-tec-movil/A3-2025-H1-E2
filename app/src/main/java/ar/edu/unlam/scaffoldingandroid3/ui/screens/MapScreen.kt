@@ -14,6 +14,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -82,6 +83,8 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -245,6 +248,8 @@ fun MonumentMap(
     val mostrarOcultos by viewModel.mostrarOcultos
     val activarAnimacion by viewModel.activarAnimacionSensor
 
+    val cazados = viewModel.monumentosCazados
+
     val animatedRadius by animateFloatAsState(
         targetValue = if (activarAnimacion) 500f else 0f,
         animationSpec = tween(800, easing = FastOutSlowInEasing),
@@ -346,6 +351,57 @@ fun MonumentMap(
         }
 
         monumentosVisibles.forEach { monumento ->
+
+            val yaCazado = cazados.contains(monumento.idMonumento)
+
+            val isNear = viewModel.estaCerca(userLocation, monumento.latLng)
+            val radiusAnim = remember { Animatable(0f) }
+            val alphaAnim = remember { Animatable(0f) }
+
+            LaunchedEffect(isNear) {
+                if (isNear) {
+                    radiusAnim.snapTo(0f)
+                    alphaAnim.snapTo(0f)
+
+                    launch {
+                        radiusAnim.animateTo(
+                            targetValue = 80f,
+                            animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+                        )
+                    }
+                    launch {
+                        alphaAnim.animateTo(
+                            targetValue = 0.6f,
+                            animationSpec = tween(durationMillis = 500),
+                        )
+                        delay(500)
+                        alphaAnim.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(durationMillis = 500),
+                        )
+                    }
+                }
+            }
+
+            if (isNear && alphaAnim.value > 0f) {
+                Circle(
+                    center = monumento.latLng,
+                    radius = radiusAnim.value.toDouble(),
+                    fillColor =
+                        if (monumento.oculto) {
+                            Color(0x882E004F).copy(alpha = alphaAnim.value) // Morado oscuro
+                        } else {
+                            Color(0x88FF0000).copy(alpha = alphaAnim.value) // Rojo con transparencia
+                        },
+                    strokeColor =
+                        if (monumento.oculto) {
+                            Color(0xFF2E004F)
+                        } else {
+                            Color(0xFFFF0000)
+                        },
+                    strokeWidth = 2f,
+                )
+            }
             Marker(
                 state = rememberMarkerState(position = monumento.latLng),
                 title = monumento.name,
@@ -356,6 +412,15 @@ fun MonumentMap(
                         BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
                     },
                 onClick = {
+                    if (yaCazado) {
+                        Toast
+                            .makeText(
+                                context,
+                                "Ya cazaste este monumento: ${monumento.name}",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        return@Marker true
+                    }
                     if (viewModel.estaCerca(userLocation, monumento.latLng)) {
                         try {
                             val file = File(context.filesDir, "monumento_${System.currentTimeMillis()}.jpg")

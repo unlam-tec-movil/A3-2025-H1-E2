@@ -1,8 +1,8 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.components
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -12,13 +12,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import ar.edu.unlam.scaffoldingandroid3.data.navigation.NavigationRoutes
+import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 
 @Composable
 fun BotonMenuNav(
@@ -47,11 +52,23 @@ fun BotonMenuNav(
                 modifier = Modifier.size(35.dp),
             )
         }
+        Spacer(modifier = Modifier.size(12.dp))
         Text(
             text = descripcion,
             fontSize = 12.sp,
             color = Color.White,
             textAlign = TextAlign.Center,
+            fontStyle = FontStyle.Normal,
+            fontFamily = FontFamily.Serif,
+            style =
+                TextStyle(
+                    shadow =
+                        Shadow(
+                            color = Color.Black,
+                            offset = Offset(2f, 2f),
+                            blurRadius = 4f,
+                        ),
+                ),
         )
     }
 }

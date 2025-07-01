@@ -1,4 +1,4 @@
-package ar.edu.unlam.scaffoldingandroid3.data.navigation
+package ar.edu.unlam.scaffoldingandroid3.ui.navigation
 
 sealed class NavigationRoutes(
     val route: String,

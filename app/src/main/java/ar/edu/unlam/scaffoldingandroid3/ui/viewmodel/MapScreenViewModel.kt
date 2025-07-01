@@ -1,0 +1,191 @@
+package ar.edu.unlam.scaffoldingandroid3.ui.viewmodel
+
+import android.content.Context
+import android.location.Location
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoEntity
+import ar.edu.unlam.scaffoldingandroid3.data.repository.PhotoRepository
+import ar.edu.unlam.scaffoldingandroid3.data.repository.UserLocalRepository
+import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.CazarMonumentoUseCase
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetUsuarioScoreUseCase
+import ar.edu.unlam.scaffoldingandroid3.infrastructure.sensor.ShakeSensor
+import ar.edu.unlam.scaffoldingandroid3.ui.location.GetLocationUseCase
+import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class MapScreenViewModel
+    @Inject
+    constructor(
+        private val getMonumentosUseCase: GetMonumentosUseCase,
+        private val getLocationUseCase: GetLocationUseCase,
+        private val photoRepository: PhotoRepository,
+        private val shakeSensor: ShakeSensor,
+        private val getUsuarioScoreUseCase: GetUsuarioScoreUseCase,
+        private val cazarMonumentoUseCase: CazarMonumentoUseCase,
+    ) : ViewModel() {
+        data class MapScreenUiState(
+            val mapUiState: MapScreenUi = MapScreenUi.Loading,
+        )
+
+        private val _uiState = MutableStateFlow(MapScreenUiState())
+        val uiState get() = _uiState.asStateFlow()
+
+        private val _location = mutableStateOf<Location?>(null)
+        val location get() = _location.value
+
+        private val _mostrarOcultos = mutableStateOf(false)
+        val mostrarOcultos: State<Boolean> get() = _mostrarOcultos
+
+        private val _activarAnimacionSensor = mutableStateOf(false)
+        val activarAnimacionSensor: State<Boolean> get() = _activarAnimacionSensor
+
+        private val _monumentosCazados = mutableStateListOf<Int>()
+        val monumentosCazados: List<Int> get() = _monumentosCazados
+
+        fun monumentoCazado(idMonumento: Int?) {
+            viewModelScope.launch {
+                getMonumentosUseCase.getMonumentos().collect {
+                    it.forEach {
+                        if (it.idMonumento == idMonumento) {
+                            cazarMonumentoUseCase.cazarMonumento(
+                                usuario = UserLocalRepository.usuario,
+                                monumento = it,
+                            )
+                            UserLocalRepository.usuario.score += it.score
+                            UserLocalRepository.usuario.level =
+                                getUsuarioScoreUseCase.calcularNivel(
+                                    UserLocalRepository.usuario.score,
+                                )
+                            _monumentosCazados.add(idMonumento)
+                        }
+                    }
+                }
+            }
+        }
+
+        fun activarCirculoTemporal() {
+            _activarAnimacionSensor.value = true
+            viewModelScope.launch {
+                delay(1500)
+                _activarAnimacionSensor.value = false
+            }
+        }
+
+        fun cargarUbicacionMonumentos(
+            context: Context,
+            permisosConcedidos: Boolean,
+        ) {
+            viewModelScope.launch {
+                val ubicacion = getLocationUseCase.getLocation(context, permisosConcedidos)
+                _location.value = ubicacion
+
+                val monumentos = getMonumentosUseCase.getMonumentos().first()
+                _uiState.value =
+                    MapScreenUiState(
+                        mapUiState = MapScreenUi.Success(monumentos, ubicacion),
+                    )
+            }
+        }
+/*
+        private fun getMonuments() {
+            viewModelScope.launch {
+                _uiState.value = MapScreenUiState(mapUiState = MapScreenUi.Loading)
+
+                getMonumentosUseCase.getMonumentos().collect { data ->
+                    _uiState.update { it.copy(mapUiState = MapScreenUi.Success(data, _location.value)) }
+                }
+            }
+        }
+*/
+
+        fun iniciarDeteccionSacudida() {
+            shakeSensor.start {
+                _mostrarOcultos.value = true
+                activarCirculoTemporal()
+            }
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            shakeSensor.stop()
+        }
+
+        fun comenzarActualizacionesUbicacion(
+            context: Context,
+            permisos: Boolean,
+        ) {
+            viewModelScope.launch {
+                getLocationUseCase.getLocationStream(
+                    context,
+                    permisos,
+                ) { nuevaUbicacion ->
+                    _location.value = nuevaUbicacion
+
+                    _uiState.update {
+                        val actual = it.mapUiState
+                        if (actual is MapScreenUi.Success) {
+                            it.copy(mapUiState = actual.copy(location = nuevaUbicacion))
+                        } else {
+                            MapScreenUiState(mapUiState = MapScreenUi.Success(emptyList(), nuevaUbicacion))
+                        }
+                    }
+                }
+            }
+        }
+
+        fun detenerUbicacion(context: Context) {
+            getLocationUseCase.detenerActualizaciones(context)
+        }
+
+        fun estaCerca(
+            userLocation: Location?,
+            monumentoLatLng: LatLng,
+            rango: Float = 20f,
+        ): Boolean {
+            if (userLocation == null) return false
+
+            val monumentLocation =
+                Location("").apply {
+                    latitude = monumentoLatLng.latitude
+                    longitude = monumentoLatLng.longitude
+                }
+
+            val distancia = userLocation.distanceTo(monumentLocation)
+            return distancia <= rango
+        }
+
+        fun guardarFoto(path: String) {
+            viewModelScope.launch {
+                photoRepository.insertPhoto(PhotoEntity(filePath = path))
+            }
+        }
+
+        @Immutable
+        sealed interface MapScreenUi {
+            data object Loading : MapScreenUi
+
+            data class Success(
+                val data: List<Monumento>,
+                val location: Location?,
+            ) : MapScreenUi
+
+            data class Error(
+                val message: String,
+            ) : MapScreenUi
+        }
+    }

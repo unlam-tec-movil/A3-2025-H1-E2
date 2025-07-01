@@ -15,7 +15,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoEntity
+import ar.edu.unlam.scaffoldingandroid3.data.local.entity.PhotoEntity
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.BackgroundEnd
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.BackgroundStart
 import coil.compose.rememberAsyncImagePainter

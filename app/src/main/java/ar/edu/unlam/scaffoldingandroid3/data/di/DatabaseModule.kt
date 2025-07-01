@@ -3,7 +3,9 @@ package ar.edu.unlam.scaffoldingandroid3.data.di
 import android.content.Context
 import androidx.room.Room
 import ar.edu.unlam.scaffoldingandroid3.data.local.AppDatabase
-import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoDao
+import ar.edu.unlam.scaffoldingandroid3.data.local.MonumentoDatabase
+import ar.edu.unlam.scaffoldingandroid3.data.local.dao.MonumentoDao
+import ar.edu.unlam.scaffoldingandroid3.data.local.dao.PhotoDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,4 +31,13 @@ object DatabaseModule {
 
     @Provides
     fun providePhotoDao(db: AppDatabase): PhotoDao = db.photoDao()
+
+    @Provides
+    @Singleton
+    fun provideMonumentDatabase(
+        @ApplicationContext context: Context,
+    ): MonumentoDatabase = Room.databaseBuilder(context, MonumentoDatabase::class.java, "monumentos-db").build()
+
+    @Provides
+    fun provideDao(db: MonumentoDatabase): MonumentoDao = db.monumentoDao()
 }

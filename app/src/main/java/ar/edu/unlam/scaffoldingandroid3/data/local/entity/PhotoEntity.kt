@@ -1,4 +1,4 @@
-package ar.edu.unlam.scaffoldingandroid3.data.local
+package ar.edu.unlam.scaffoldingandroid3.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

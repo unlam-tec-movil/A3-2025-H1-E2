@@ -1,15 +1,19 @@
 package ar.edu.unlam.scaffoldingandroid3.data.repository
 
+import ar.edu.unlam.scaffoldingandroid3.data.local.dao.MonumentoDao
+import ar.edu.unlam.scaffoldingandroid3.data.local.entity.MonumentoEntity
 import ar.edu.unlam.scaffoldingandroid3.data.usecases.MonumentRepository
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class LocalMonumentRepository
     @Inject
-    constructor() : MonumentRepository {
+    constructor(
+        private val dao: MonumentoDao,
+    ) : MonumentRepository {
         private val localMonumentRepository =
             listOf<Monumento>(
                 Monumento(
@@ -84,10 +88,43 @@ class LocalMonumentRepository
                     score = 100,
                     oculto = false,
                 ),
+                Monumento(
+                    idMonumento = 10,
+                    name = "prueba",
+                    latLng = LatLng(-34.6093547349509, -58.63336189529318),
+                    descripcion = "prueba",
+                    score = 100,
+                    oculto = false,
+                ),
             )
 
-        override suspend fun getMonumentos(): Flow<List<Monumento>> {
-            val data = localMonumentRepository
-            return flowOf(data)
+        override suspend fun getMonumentos(): Flow<List<Monumento>> =
+            dao.getAll().map { entities ->
+                val local = entities.map { it.toDomain() }
+                localMonumentRepository + local
+            }
+
+        suspend fun addMonumento(monumento: Monumento) {
+            dao.insert(monumento.toEntity())
         }
+
+        private fun MonumentoEntity.toDomain(): Monumento =
+            Monumento(
+                idMonumento = id,
+                name = name,
+                latLng = LatLng(lat, lng),
+                descripcion = descripcion,
+                score = score,
+                oculto = oculto,
+            )
+
+        private fun Monumento.toEntity(): MonumentoEntity =
+            MonumentoEntity(
+                name = name,
+                lat = latLng.latitude,
+                lng = latLng.longitude,
+                descripcion = descripcion,
+                score = score,
+                oculto = oculto,
+            )
     }

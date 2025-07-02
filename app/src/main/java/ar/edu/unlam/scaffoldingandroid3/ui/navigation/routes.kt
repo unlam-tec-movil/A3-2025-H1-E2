@@ -18,4 +18,6 @@ sealed class NavigationRoutes(
     data object MonumentosScreen : NavigationRoutes(route = "monumentos")
 
     data object AlbumScreen : NavigationRoutes(route = "album")
+
+    data object FelicitationScreen : NavigationRoutes(route = "felicitation")
 }

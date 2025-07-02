@@ -14,16 +14,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ar.edu.unlam.scaffoldingandroid3.ui.components.ApptopBar
 import ar.edu.unlam.scaffoldingandroid3.ui.navigation.NavigationRoutes
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.AjustesScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.AlbumScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.ComunidadScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.CreateMonumentScreen
+import ar.edu.unlam.scaffoldingandroid3.ui.screens.FelicitationScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.MapScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.MonumentosScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.NotificacionesScreen
@@ -144,6 +147,21 @@ class MainActivity : ComponentActivity() {
 
                         composable(NavigationRoutes.AlbumScreen.route) {
                             AlbumScreen(innerPadding = innerPadding)
+                        }
+
+                        composable(
+                            route = "${NavigationRoutes.FelicitationScreen}/{monumento}/{puntos}",
+                            arguments =
+                                listOf(
+                                    navArgument("monumento") { type = NavType.StringType },
+                                    navArgument("puntos") { type = NavType.IntType },
+                                ),
+                        ) {
+                            FelicitationScreen(
+                                onContinue = {
+                                    controller.popBackStack(NavigationRoutes.MapScreen.route, inclusive = false)
+                                },
+                            )
                         }
                     }
                 }

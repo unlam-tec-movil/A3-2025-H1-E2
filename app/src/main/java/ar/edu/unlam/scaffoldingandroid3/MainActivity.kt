@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,6 +29,7 @@ import ar.edu.unlam.scaffoldingandroid3.ui.screens.MonumentosScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.NotificacionesScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.screens.ProfileScreen
 import ar.edu.unlam.scaffoldingandroid3.ui.theme.ScaffoldingAndroid3Theme
+import ar.edu.unlam.scaffoldingandroid3.ui.viewmodel.MapScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -90,11 +92,15 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(NavigationRoutes.MapScreen.route) {
                             if (locationPermission) {
+                                val parentEntry = remember { controller.getBackStackEntry(NavigationRoutes.MapScreen.route) }
+                                val sharedViewModel: MapScreenViewModel = hiltViewModel(parentEntry)
+
                                 MapScreen(
                                     controller,
                                     // cameraPermission,
                                     // requestCameraPermission(),
                                     locationPermission,
+                                    viewModel = sharedViewModel,
                                 )
                             }
                         }
@@ -104,7 +110,20 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(NavigationRoutes.CreateMonument.route) {
-                            CreateMonumentScreen()
+                            val mapScreenViewModel: MapScreenViewModel =
+                                hiltViewModel(
+                                    controller.getBackStackEntry(NavigationRoutes.MapScreen.route),
+                                )
+                            val userLocation = mapScreenViewModel.location
+
+                            CreateMonumentScreen(
+                                mapScreenViewModel = mapScreenViewModel,
+                                onNavigateBack = {
+                                    controller.popBackStack()
+                                },
+                                userLocation = userLocation,
+                                innerPadding = innerPadding,
+                            )
                         }
 
                         composable(NavigationRoutes.AjustesScreen.route) {

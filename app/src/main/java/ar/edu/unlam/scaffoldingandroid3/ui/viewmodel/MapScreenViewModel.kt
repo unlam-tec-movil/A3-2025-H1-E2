@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ar.edu.unlam.scaffoldingandroid3.data.local.PhotoEntity
+import ar.edu.unlam.scaffoldingandroid3.data.local.entity.PhotoEntity
 import ar.edu.unlam.scaffoldingandroid3.data.repository.PhotoRepository
 import ar.edu.unlam.scaffoldingandroid3.data.repository.UserLocalRepository
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento

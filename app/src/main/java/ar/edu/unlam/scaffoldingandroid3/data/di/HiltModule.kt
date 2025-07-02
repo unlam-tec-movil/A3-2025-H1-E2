@@ -3,9 +3,11 @@ package ar.edu.unlam.scaffoldingandroid3.data.di
 import android.content.Context
 import ar.edu.unlam.scaffoldingandroid3.data.repository.LocalMonumentRepository
 import ar.edu.unlam.scaffoldingandroid3.domain.services.CazarMonumentoService
+import ar.edu.unlam.scaffoldingandroid3.domain.services.CreateMonumentoService
 import ar.edu.unlam.scaffoldingandroid3.domain.services.GetMonumentosService
 import ar.edu.unlam.scaffoldingandroid3.domain.services.GetUsuarioScoreService
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.CazarMonumentoUseCase
+import ar.edu.unlam.scaffoldingandroid3.domain.usecases.CreateMonumentoUseCase
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetMonumentosUseCase
 import ar.edu.unlam.scaffoldingandroid3.domain.usecases.GetUsuarioScoreUseCase
 import ar.edu.unlam.scaffoldingandroid3.infrastructure.sensor.AndroidShakeSensor
@@ -44,4 +46,8 @@ object HiltModule {
     @Singleton
     @Provides
     fun provideCazarMonumentoService(): CazarMonumentoUseCase = CazarMonumentoService()
+
+    @Singleton
+    @Provides
+    fun provideCreateMonumentoUseCase(repo: LocalMonumentRepository): CreateMonumentoUseCase = CreateMonumentoService(repo)
 }

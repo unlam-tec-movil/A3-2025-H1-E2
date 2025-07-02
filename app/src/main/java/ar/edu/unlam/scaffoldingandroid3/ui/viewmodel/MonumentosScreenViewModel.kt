@@ -1,5 +1,8 @@
 package ar.edu.unlam.scaffoldingandroid3.ui.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ar.edu.unlam.scaffoldingandroid3.domain.model.Monumento
@@ -15,7 +18,8 @@ class MonumentosScreenViewModel
     constructor(
         private val getMonumentosUseCase: GetMonumentosUseCase,
     ) : ViewModel() {
-        var monumentos: List<Monumento> = emptyList()
+        var monumentos by mutableStateOf<List<Monumento>>(emptyList())
+            private set
 
         init {
             getMonumentos()

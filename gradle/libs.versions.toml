@@ -18,6 +18,7 @@ androidXHilt = "1.2.0"
 ksp = "2.0.21-1.0.27"
 kover = "0.7.6"
 ktlint = "12.1.0"
+lottieCompose = "6.1.0"
 mapsCompose = "6.4.1"
 playServicesMaps = "19.2.0"
 playServicesLocation = "21.3.0"
@@ -58,6 +59,7 @@ coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }

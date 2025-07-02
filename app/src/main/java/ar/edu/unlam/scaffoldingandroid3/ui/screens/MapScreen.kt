@@ -188,6 +188,7 @@ private fun MapScreenSuccess(
                     data = data,
                     cameraPositionState = cameraPositionState,
                     viewModel,
+                    controller = controller,
                 )
                 // Esto es para evitar que se pueda interactuar con el mapa cuando se abre el menu
                 if (contentState) {
@@ -238,6 +239,7 @@ fun MonumentMap(
     data: List<Monumento>,
     cameraPositionState: CameraPositionState,
     viewModel: MapScreenViewModel,
+    controller: NavHostController,
 ) {
     val context = LocalContext.current
 
@@ -270,7 +272,15 @@ fun MonumentMap(
                 Toast.makeText(context, "¡Monumento Cazado!", Toast.LENGTH_SHORT).show()
                 photoFile.value?.let {
                     viewModel.guardarFoto(it.absolutePath)
-                    viewModel.monumentoCazado(monumentoIdSeleccionado.value)
+
+                    val monumentoId = monumentoIdSeleccionado.value
+                    viewModel.monumentoCazado(monumentoId)
+
+                    val monumento = data.find { it.idMonumento == monumentoId }
+
+                    monumento?.let {
+                        controller.navigate("${NavigationRoutes.FelicitationScreen}/${it.name}/${it.score}")
+                    }
                 }
             } else {
                 Toast.makeText(context, "No se tomó la foto", Toast.LENGTH_SHORT).show()
